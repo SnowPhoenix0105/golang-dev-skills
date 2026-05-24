@@ -12,6 +12,23 @@ description: |
 Fyne 是纯 Go 实现的跨平台 GUI 框架，基于 OpenGL ES 2.0 硬件加速渲染。
 核心设计：**声明式 Widget + 响应式数据绑定**，同一套 API 覆盖 Windows/macOS/Linux/iOS/Android/WebAssembly。
 
+## Fyne 生态系统
+
+核心框架 `fyne.io/fyne/v2` 提供跨平台 GUI 基础能力。以下周边仓库按需选用：
+
+| 仓库 | 用途 | go module |
+|------|------|-----------|
+| **fyne-x** | 社区扩展包：额外 Widget（FileTree、CompletionEntry、AnimatedGif、Map、HexWidget、NumericalEntry）、ResponsiveLayout、About 对话框、Adwaita 主题 | `fyne.io/x/fyne` |
+| **fyne-cross** | Docker 交叉编译：一条命令将 Fyne 应用打包到 Windows/macOS/Linux/Android/iOS/FreeBSD | `github.com/fyne-io/fyne-cross` |
+| **terminal** | 终端模拟器 Widget：ANSI 转义序列、鼠标、选择/复制、交替屏幕缓冲 | `github.com/fyne-io/terminal` |
+| **systray** | 跨平台系统托盘（无 GTK 依赖）：图标、菜单、点击事件 | `fyne.io/systray` |
+| **tools** | fyne CLI：`go run fyne.io/tools/v2/cmd/fyne` — 构建、打包、资源嵌入 | `fyne.io/tools/v2` |
+| **refyne** | UI 序列化：JSON 导入/导出、Go 代码生成、属性编辑器 | `github.com/fyne-io/refyne` |
+| **gl-js** | OpenGL ES 2 绑定（WebGL 后端 + Windows 支持）— 内部依赖，通常不直接使用 | `github.com/fyne-io/gl-js` |
+| **defyne** | 实验性 IDE（已由 Apptrix.ai 取代），JSON 序列化工作已拆分到 refyne | `github.com/fyne-io/defyne` |
+
+如需浏览本地源码，用 `go list -m -json fyne.io/fyne/v2` 查找模块路径。
+
 ## 核心原则
 
 1. **容器组合 > 绝对定位** — 使用 `container.New*` 系列函数构建布局
@@ -72,33 +89,23 @@ fyne.CanvasObject — 最底层基础接口       所有可绘制对象必须实
 
 以下均由框架提供，直接调用构造函数即可。它们内部实现了上述框架接口。
 
-### 基础 Widget
+### 基础 Widget（完整列表见 `references/api-reference.md`）
 
 ```go
-widget.NewLabel("text")
+// 最常用的 10 个
+widget.NewLabel("text")                    // .Selectable = true 可选文本 (v2.6+)
 widget.NewButton("text", func() {})
-widget.NewEntry()                       // .Text 获取内容, .OnChanged = func(string)
-widget.NewMultiLineEntry()
-widget.NewPasswordEntry()
-widget.NewEntryWithValidation(placeholder, validator) // 带验证
-widget.NewCheck("label", func(bool) {})
-widget.NewCheckGroup([]string{"a","b"}, func([]string) {})
-widget.NewRadioGroup([]string{"a","b"}, func(string) {})
-widget.NewSelect([]string{"a","b"}, func(string) {})  // .PlaceHolder
-widget.NewSelectEntry([]string{"a","b"})              // 可输入的下拉
-widget.NewSlider(min, max)                            // .Step 设置步长
+widget.NewEntry()                          // .Text, .OnChanged
+widget.NewCheck("label", func(bool) {})    // .Partial = true 半选 (v2.6+)
+widget.NewSelect([]string{"a","b"}, func(string) {})
+widget.NewSlider(min, max)
 widget.NewProgressBar()
-widget.NewProgressBarInfinite()
-widget.NewHyperlink("text", url)
-widget.NewIcon(resource)
-widget.NewSeparator()
+widget.NewRichText(segments...)            // 多段样式富文本
+widget.NewRichTextFromMarkdown(content)    // Markdown → RichText
 widget.NewCard(title, subtitle, content)
-widget.NewCalendar(callback)
-widget.NewFileIcon(uri)
-widget.NewActivity()
 ```
 
-表单、工具栏、富文本等高级 Widget 用法见 `references/api-reference.md` Widget 列表和 `references/best-practices.md`。
+表单（`widget.NewForm`）、工具栏（`widget.NewToolbar`）、日历（`NewCalendar` v2.6+）、Markdown 渲染（`NewMarkdown`）等其他 Widget 见 `references/api-reference.md`。
 
 ### 虚拟滚动（大数据集，必须使用）
 
@@ -128,25 +135,23 @@ widget.NewListWithData(dataList, createFn, updateFn)
 ```go
 import "fyne.io/fyne/v2/container"
 
-// 常用容器
-container.NewVBox(objs...)                         // 垂直（按 MinSize 高度）
-container.NewHBox(objs...)                         // 水平（按 MinSize 宽度）
-container.NewBorder(top, bottom, left, right, center...) // 边框（nil=不填）
-container.NewGridWithColumns(cols, objs...)        // 按列网格
-container.NewGridWithRows(rows, objs...)           // 按行网格
-container.NewGridWrap(size, objs...)               // 固定大小自动换行
-container.NewAdaptiveGrid(rowcols, objs...)        // 自适应（移动端响应旋转）
-container.NewStack(objs...)                        // 堆叠（后添加在上层）
-container.NewCenter(objs...)                       // 居中
-container.NewPadded(objs...)                       // 标准 padding
+// 最常用容器（完整列表见 references/api-reference.md）
+container.NewVBox(objs...)                   // 垂直
+container.NewHBox(objs...)                   // 水平
+container.NewBorder(top, bottom, left, right, center...) // 边框
+container.NewGridWithColumns(cols, objs...)  // 按列网格
+container.NewAdaptiveGrid(rowcols, objs...)  // 自适应网格
+container.NewStack(objs...)                  // 堆叠
+container.NewCenter(objs...)                 // 居中
+container.NewPadded(objs...)                 // 标准 padding
 
-// 特殊容器
-container.NewScroll(content)                       // 滚动
-container.NewHSplit(left, right)                   // 水平分割
-container.NewVSplit(top, bottom)                   // 垂直分割
-container.NewAppTabs(items...)                     // 标签页
-container.NewDocTabs(items...)                     // 文档标签页
-container.NewWithoutLayout(objs...)                // 无布局（需手动 Resize/Move）
+// 特殊功能
+container.NewScroll(content)                 // 滚动
+container.NewHSplit(left, right)             // 水平分割
+container.NewVSplit(top, bottom)             // 垂直分割
+container.NewAppTabs(items...)               // 标签页
+container.NewNavigation(content)             // 导航（返回按钮）(v2.7+)
+container.NewClip(content)                   // 裁剪溢出 (v2.7+)
 ```
 
 弹性占位符：
@@ -154,30 +159,27 @@ container.NewWithoutLayout(objs...)                // 无布局（需手动 Resi
 container.NewHBox(layout.NewSpacer(), widget.NewButton("OK", fn))
 ```
 
+GridWrap / RowWrap / Max / DocTabs 等见 `references/api-reference.md`。
+
 ## 数据绑定
 
 ```go
 import "fyne.io/fyne/v2/data/binding"
 
-// 基础绑定（goroutine-safe）
-s := binding.NewString()               // 值绑定
-b := binding.NewBool()                 // 获取/设置：.Get() / .Set()
+// goroutine-safe — 可在任何 goroutine 中读写
+s := binding.NewString()               // .Get() / .Set(val)
+b := binding.NewBool()
 i := binding.NewInt()
-f := binding.NewFloat()
 
-// 集合绑定
-binding.NewStringList()                // list 绑定
-binding.NewStringTree()                // 树绑定
-
-// 外部绑定（绑定到已有变量，修改变量后需调用 .Reload()）
+// 外部绑定：绑定到已有变量（修改变量后需调用 .Reload()）
 binding.BindString(&myVar)
-binding.BindInt(&myCount)
 
 // 转换
-binding.IntToString(intBinding)        // Int → String
-binding.StringToInt(strBinding)        // String → Int
-binding.SPrintf("%d/%d", cur, total)   // 格式化
+binding.IntToString(intBinding)
+binding.SPrintf("Count: %d", intBinding)
 ```
+
+完整 API（集合绑定、列表绑定、树绑定、URI 绑定、Preference 绑定等）见 `references/api-reference.md` 数据绑定 API 部分。
 
 ## Canvas 原始图形
 
@@ -186,13 +188,13 @@ import "fyne.io/fyne/v2/canvas"
 
 canvas.NewRectangle(color)              // 矩形（常用作背景）
 canvas.NewCircle(color)
-canvas.NewLine(color)                   // 必须用 *canvas.Line
-canvas.NewText("text", color)           // 必须用 *canvas.Text
-canvas.NewImageFromResource(resource)
+canvas.NewLine(color)                   // 必须用 *canvas.Line（指针！）
+canvas.NewText("text", color)           // 必须用 *canvas.Text（指针！）
 canvas.NewImageFromFile(path)
 canvas.NewLinearGradient(start, end)
-canvas.NewRadialGradient(center, radius)
 ```
+
+**v2.7+ 新增**：`NewSquare`、`NewArc`/`NewPieArc`/`NewDoughnutArc`、`NewPolygon`、Rectangle 圆角（`CornerRadius`/`Aspect`）、Image 填充模式（`FillMode`/`CornerRadius`）。完整列表和属性见 `references/api-reference.md` Canvas 原始图形 + Rectangle 属性 + ImageFill 模式部分。
 
 ## 自定义 Widget
 
@@ -362,37 +364,47 @@ a := test.NewApp()
 | Grid 有空白 | `Hide()` 的对象仍占格 | 从 `Objects` 中 `Remove` |
 | 数据绑定不更新 | 外部变量修改后未 `Reload()` | 调用 `b.Reload()` |
 | 非可见 Widget MinSize 为 0 | 框架优化：不可见 Widget 无渲染器 | 放入 Canvas 中再测试 |
+| v2.6+ `fyne.Do called from main goroutine` | 在事件回调（已主 goroutine）中调了 `fyne.Do` | 去掉事件回调中的 `fyne.Do`，直接操作即可 |
 
 ## 无从下手？先读这些
 
-当 references 覆盖不到、需要探索 Fyne 源码时，使用以下方法自行查找答案：
+当 references 覆盖不到、需要探索 Fyne 源码时，使用以下方法自行查找答案。
+
+### 包路径 → 文件系统映射
+
+Go 包路径 `fyne.io/fyne/v2/widget` 对应的文件系统路径通过以下两种方式找到：
+
+```bash
+# 方式一：go list（精准，推荐）
+FYNE_DIR=$(go list -m -json fyne.io/fyne/v2 | grep '"Dir"' | cut -d'"' -f4)
+
+# 方式二：GOMODCACHE（简单直接，支持通配符）
+FYNE_DIR=$(echo $(go env GOMODCACHE)/fyne.io/fyne/v2@*)
+# 如果有多个版本，取最新的或指定版本：
+FYNE_DIR=$(go env GOMODCACHE)/fyne.io/fyne/v2@v2.5.0
+```
+
+获取 `$FYNE_DIR` 后，包路径的后半段就是子目录。例如 `fyne.io/fyne/v2/widget` → `$FYNE_DIR/widget/`，`fyne.io/fyne/v2/canvas` → `$FYNE_DIR/canvas/`。
 
 ### 查找 API
 
 ```bash
-# 在线文档（首选）
-go doc fyne.io/fyne/v2/widget   # 查看 widget 包的所有导出符号
-go doc fyne.io/fyne/v2/widget.Button  # 查看具体类型的方法
+# go doc（首选，无需知道源码路径）
+go doc fyne.io/fyne/v2/widget
+go doc fyne.io/fyne/v2/widget.Button
 
-# 搜索源码中的模式
-rg "func.*New.*Pop" $(go env GOMODCACHE)/fyne.io/fyne/v2@*/widget/
-rg "type.*Renderer" $(go env GOMODCACHE)/fyne.io/fyne/v2@*/widget/
+# rg 搜索
+rg "func.*New.*Pop" "$FYNE_DIR/widget/"
+rg "type.*Renderer" "$FYNE_DIR/widget/"
 ```
 
 ### 学习内置 Widget 的实现
 
-Fyne 内置 Widget 源码是最好的参考。查找路径：`$(go env GOMODCACHE)/fyne.io/fyne/v2@<version>/`
+找到 `$FYNE_DIR` 后，阅读内置 Widget 源码是最好的学习方式。例如看 `widget` 包下各组件的 `CreateRenderer` 实现：
 
 ```bash
-# 找到 Fyne 安装路径
-go list -m -json fyne.io/fyne/v2 | grep Dir
-
-# 看现有 Widget 如何实现 CreateRenderer
-cat $(go env GOMODCACHE)/fyne.io/fyne/v2@*/widget/button.go | head -100
-
-# 搜索特定模式
-rg "ExtendBaseWidget" $(go env GOMODCACHE)/fyne.io/fyne/v2@*/widget/
-rg "CreateRenderer" $(go env GOMODCACHE)/fyne.io/fyne/v2@*/widget/ | head -20
+rg "ExtendBaseWidget" "$FYNE_DIR/widget/"
+rg "CreateRenderer" "$FYNE_DIR/widget/" | head -20
 ```
 
 ### Fyne 代码约定
@@ -417,6 +429,5 @@ rg "CreateRenderer" $(go env GOMODCACHE)/fyne.io/fyne/v2@*/widget/ | head -20
 | Widget 不显示/崩溃/性能差 | `references/troubleshooting.md` | 先查快速诊断表，再查对应章节 |
 | 写自定义 Widget | `references/custom-widget.md` | 完整模板 + 5 条关键规则 |
 | 单元测试怎么写 | `references/testing.md` | 模拟交互、渲染验证示例 |
-| 需要完整架构理解 | `docs/01-核心概念与架构.md` | 分层架构、事件系统 |
 
-上述 references 都覆盖不到时，按照上一节"无从下手？先读这些"的方法探索源码。
+上述 references 都覆盖不到时，按照上一节"无从下手？先读这些"的方法探索源码。如果探索源码后仍然无法解决，**向用户报告具体情况并寻求帮助，不得静默猜测。**

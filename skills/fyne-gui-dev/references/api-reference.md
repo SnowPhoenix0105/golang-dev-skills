@@ -1,36 +1,36 @@
-# 完整 API 速查表
+# Complete API Quick Reference
 
-## 目录
+## Table of Contents
 
-**框架层（接口/约定，自定义 Widget 时必须理解）：**
-- [CanvasObject 接口](#canvasobject-接口)
-- [Widget 接口与 WidgetRenderer](#widget-接口与-widgetrenderer)
+**Framework Layer (interfaces/contracts — must understand for custom Widgets):**
+- [CanvasObject Interface](#canvasobject-interface)
+- [Widget Interface & WidgetRenderer](#widget-interface--widgetrenderer)
 - [BaseWidget](#basewidget)
-- [Layout 列表](#layout-列表)
-- [事件接口](#事件接口)
-- [数据绑定 API](#数据绑定-api)
-- [App 接口](#app-接口)
-- [Window 接口](#window-接口)
-- [Canvas 接口](#canvas-接口)
+- [Layout List](#layout-list)
+- [Event Interfaces](#event-interfaces)
+- [Data Binding API](#data-binding-api)
+- [App Interface](#app-interface)
+- [Window Interface](#window-interface)
+- [Canvas Interface](#canvas-interface)
 - [OverlayStack](#overlaystack)
-- [样式与主题 — Theme 接口](#样式与主题)
-- [Geometry](#geometry) / [Device](#device) / [资源](#资源) / [存储](#存储) / [偏好存储](#偏好存储) / [动画](#动画)
+- [Theme & Styling — Theme Interface](#theme--styling)
+- [Geometry](#geometry) / [Device](#device) / [Resources](#resources) / [Storage](#storage) / [Preferences](#preferences) / [Animations](#animations)
 
-**组件层（直接调用构造函数的成品）：**
-- [Widget 列表](#widget-列表)
-- [Container 列表](#container-列表)
-- [Layout 列表](#layout-列表)
-- [Canvas 原始图形](#canvas-原始图形)
-- [对话框 API](#对话框-api)
-- [菜单 API](#菜单-api)
-- [快捷键](#快捷键)
+**Component Layer (ready-made constructors):**
+- [Widget List](#widget-list)
+- [Container List](#container-list)
+- [Layout List](#layout-list)
+- [Canvas Primitives](#canvas-primitives)
+- [Dialog API](#dialog-api)
+- [Menu API](#menu-api)
+- [Shortcuts](#shortcuts)
 
-**工具函数：**
-- [关键函数](#关键函数)
+**Utility Functions:**
+- [Key Functions](#key-functions)
 
 ---
 
-## CanvasObject 接口
+## CanvasObject Interface
 
 ```go
 type CanvasObject interface {
@@ -46,7 +46,7 @@ type CanvasObject interface {
 }
 ```
 
-## Widget 接口与 WidgetRenderer
+## Widget Interface & WidgetRenderer
 
 ```go
 type Widget interface {
@@ -63,84 +63,84 @@ type WidgetRenderer interface {
 }
 ```
 
-`widget.NewSimpleRenderer(object)` 可用于只有一个 CanvasObject 的 Widget。
+`widget.NewSimpleRenderer(object)` can be used for Widgets with only one CanvasObject.
 
 ## BaseWidget
 
-位于 `widget` 包，提供位置/大小/可见性/Refresh 的标准实现。
+Located in the `widget` package, provides standard implementations for position/size/visibility/Refresh.
 
 ```go
 type BaseWidget struct {
     size     fyne.Size
     position fyne.Position
     Hidden   bool
-    // impl       fyne.Widget   // 内部字段
-    // themeCache fyne.Theme    // 内部字段
+    // impl       fyne.Widget   // internal field
+    // themeCache fyne.Theme    // internal field
 }
 ```
 
-关键方法：`ExtendBaseWidget(wid)` — 必须由扩展 Widget 的构造器调用。
+Key method: `ExtendBaseWidget(wid)` — must be called by the constructor of any Widget extending BaseWidget.
 
-`DisableableWidget` 扩展 BaseWidget，增加 `Enable()/Disable()/Disabled()`。
+`DisableableWidget` extends BaseWidget, adding `Enable()/Disable()/Disabled()`.
 
 ---
 
-## 内置组件 (Component API)
+## Built-in Components (Component API)
 
-以下均为框架内置的、可直接实例化的组件。它们内部实现了上述框架接口。
+All provided by the framework — ready to instantiate. They internally implement the framework interfaces above.
 
-### Widget 列表
+### Widget List
 
-| Widget | 构造函数 | 数据绑定构造 | 说明 |
-|--------|---------|------------|------|
-| Label | `NewLabel(text)` | `NewLabelWithData(data)` | 文本标签 |
-| Button | `NewButton(text, fn)` | `NewButtonWithData(name, icon, data, fn)` | 按钮 |
-| Entry | `NewEntry()` | `NewEntryWithData(data)` | 单行输入 |
-| MultiLineEntry | `NewMultiLineEntry()` | - | 多行输入 |
-| PasswordEntry | `NewPasswordEntry()` | - | 密码输入 |
-| EntryValidation | `NewEntryWithValidation(placeholder, validate)` | - | 验证输入, `.AlwaysShowValidationError` (v2.7+) |
-| Select | `NewSelect(opts, fn)` | `NewSelectWithData(opts, data, fn)` | 下拉选择 |
-| SelectEntry | `NewSelectEntry(opts)` | - | 可下拉输入 |
-| Check | `NewCheck(label, fn)` | `NewCheckWithData(label, data)` | 复选框 |
-| CheckGroup | `NewCheckGroup(opts, fn)` | - | 复选框组 |
-| RadioGroup | `NewRadioGroup(opts, fn)` | - | 单选组 |
-| Slider | `NewSlider(min, max)` | `NewSliderWithData(min, max, data)` | 滑块 |
-| ProgressBar | `NewProgressBar()` | - | 进度条 |
-| ProgressBarInfinite | `NewProgressBarInfinite()` | - | 无限进度 |
-| Toolbar | `NewToolbar(items...)` | - | 工具栏 |
-| Icon | `NewIcon(res)` | - | 图标 |
-| Hyperlink | `NewHyperlink(text, url)` | - | 超链接 |
-| Separator | `NewSeparator()` | - | 分割线 |
-| Card | `NewCard(title, sub, content)` | - | 卡片 |
-| Accordion | `NewAccordion(items...)` | - | 手风琴 |
-| AccordionItem | `NewAccordionItem(title, detail)` | - | 手风琴项 |
-| Form | `NewForm(items...)` | - | 表单 |
-| FormItem | `NewFormItem(text, widget)` | - | 表单项 |
-| List | `NewList(len, create, update)` | `NewListWithData(data, create, update)` | 虚拟列表 |
-| Table | `NewTable(len, create, update)` | - | 虚拟表格 |
-| Tree | `NewTree(childUIDs, isBranch, create, update)` | - | 树 |
-| FileIcon | `NewFileIcon(uri)` | - | 文件图标 |
-| TextGrid | `NewTextGrid()` | - | 文本网格 |
-| Calendar | `NewCalendar(callback)` | - | 日历 |
-| DateEntry | `NewDateEntry()` | - | 日期输入 |
-| Activity | `NewActivity()` | - | 活动指示器 |
-| Markdown | `NewMarkdown(content, onHyperlink)` | - | Markdown 渲染 |
-| RichText | `NewRichText(segments...)` | - | 富文本（多段样式） |
+| Widget | Constructor | Data-Binding Constructor | Description |
+|--------|------------|--------------------------|-------------|
+| Label | `NewLabel(text)` | `NewLabelWithData(data)` | Text label |
+| Button | `NewButton(text, fn)` | `NewButtonWithData(name, icon, data, fn)` | Button |
+| Entry | `NewEntry()` | `NewEntryWithData(data)` | Single-line input |
+| MultiLineEntry | `NewMultiLineEntry()` | - | Multi-line input |
+| PasswordEntry | `NewPasswordEntry()` | - | Password input |
+| EntryValidation | `NewEntryWithValidation(placeholder, validate)` | - | Validated input, `.AlwaysShowValidationError` (v2.7+) |
+| Select | `NewSelect(opts, fn)` | `NewSelectWithData(opts, data, fn)` | Dropdown select |
+| SelectEntry | `NewSelectEntry(opts)` | - | Editable dropdown |
+| Check | `NewCheck(label, fn)` | `NewCheckWithData(label, data)` | Checkbox |
+| CheckGroup | `NewCheckGroup(opts, fn)` | - | Checkbox group |
+| RadioGroup | `NewRadioGroup(opts, fn)` | - | Radio group |
+| Slider | `NewSlider(min, max)` | `NewSliderWithData(min, max, data)` | Slider |
+| ProgressBar | `NewProgressBar()` | - | Progress bar |
+| ProgressBarInfinite | `NewProgressBarInfinite()` | - | Infinite progress |
+| Toolbar | `NewToolbar(items...)` | - | Toolbar |
+| Icon | `NewIcon(res)` | - | Icon |
+| Hyperlink | `NewHyperlink(text, url)` | - | Hyperlink |
+| Separator | `NewSeparator()` | - | Separator |
+| Card | `NewCard(title, sub, content)` | - | Card |
+| Accordion | `NewAccordion(items...)` | - | Accordion |
+| AccordionItem | `NewAccordionItem(title, detail)` | - | Accordion item |
+| Form | `NewForm(items...)` | - | Form |
+| FormItem | `NewFormItem(text, widget)` | - | Form item |
+| List | `NewList(len, create, update)` | `NewListWithData(data, create, update)` | Virtual list |
+| Table | `NewTable(len, create, update)` | - | Virtual table |
+| Tree | `NewTree(childUIDs, isBranch, create, update)` | - | Tree |
+| FileIcon | `NewFileIcon(uri)` | - | File icon |
+| TextGrid | `NewTextGrid()` | - | Monospace text grid |
+| Calendar | `NewCalendar(callback)` | - | Calendar |
+| DateEntry | `NewDateEntry()` | - | Date input |
+| Activity | `NewActivity()` | - | Activity indicator |
+| Markdown | `NewMarkdown(content, onHyperlink)` | - | Markdown rendering |
+| RichText | `NewRichText(segments...)` | - | Multi-segment rich text |
 | RichTextFromMarkdown | `NewRichTextFromMarkdown(content)` | - | Markdown → RichText |
-| PopUp | `NewPopUp(content, canvas)` | - | 弹出层 |
-| ModalPopUp | `NewModalPopUp(content, canvas)` | - | 模态弹出层（带遮罩） |
-| PopUpMenu | `NewPopUpMenu(menu, canvas)` | - | 弹出菜单 |
-| Selectable | - | - | `label.Selectable = true` 可选文本 (v2.6+) |
-| PartialCheck | - | - | `check.Partial = true` 半选态 (v2.6+) |
+| PopUp | `NewPopUp(content, canvas)` | - | Pop-up layer |
+| ModalPopUp | `NewModalPopUp(content, canvas)` | - | Modal pop-up (with overlay) |
+| PopUpMenu | `NewPopUpMenu(menu, canvas)` | - | Pop-up menu |
+| Selectable | - | - | `label.Selectable = true` selectable text (v2.6+) |
+| PartialCheck | - | - | `check.Partial = true` indeterminate state (v2.6+) |
 
-### Container 列表
+### Container List
 
 ```go
-// 基础容器
+// Basic containers
 container.New(layout, objects...)
 container.NewWithoutLayout(objects...)
 
-// 布局容器
+// Layout containers
 container.NewVBox(objects...)
 container.NewHBox(objects...)
 container.NewBorder(top, bottom, left, right, center...)
@@ -151,17 +151,17 @@ container.NewAdaptiveGrid(rowcols, objects...)
 container.NewStack(objects...)
 container.NewCenter(objects...)
 container.NewPadded(objects...)
-container.NewMax(obj1, obj2...)                   // v2.7+ 取最大 MinSize
+container.NewMax(obj1, obj2...)                   // v2.7+ largest MinSize
 
-// 特殊容器
+// Special containers
 container.NewScroll(content)
-container.NewHSplit(left, right)          // offset 可调节
+container.NewHSplit(left, right)          // offset adjustable
 container.NewVSplit(top, bottom)
 container.NewAppTabs(items...)
 container.NewDocTabs(items...)
-container.NewNavigation(content)          // v2.7+ 导航（带返回按钮）
-container.NewNavigationWithTitle(content, title) // v2.7+ 带标题
-container.NewClip(content)                // v2.7+ 裁剪超出内容
+container.NewNavigation(content)          // v2.7+ navigation (back button)
+container.NewNavigationWithTitle(content, title) // v2.7+ with title
+container.NewClip(content)                // v2.7+ clip overflow
 container.NewInnerWindow(title, content)
 
 // TabItem
@@ -169,7 +169,7 @@ container.NewTabItem(text, content)
 container.NewTabItemWithIcon(text, icon, content)
 ```
 
-### Layout 列表
+### Layout List
 
 ```go
 layout.NewHBoxLayout()
@@ -184,23 +184,23 @@ layout.NewFormLayout()
 layout.NewPaddedLayout()
 layout.NewCenterLayout()
 layout.NewStackLayout()
-layout.NewRowWrapLayout()                                // v2.7+ 水平换行
-layout.NewRowWrapLayoutWithCustomPadding(hPad, vPad)     // v2.7+ 带自定义间距
-layout.NewMaxLayout()                                    // v2.7+ 取子对象最大 MinSize
-layout.NewSpacer()              // 弹性占位符（非 Layout，是 CanvasObject）
+layout.NewRowWrapLayout()                                // v2.7+ horizontal wrap
+layout.NewRowWrapLayoutWithCustomPadding(hPad, vPad)     // v2.7+ with custom padding
+layout.NewMaxLayout()                                    // v2.7+ max child MinSize
+layout.NewSpacer()              // flexible spacer (not a Layout, is a CanvasObject)
 ```
 
-### Canvas 原始图形
+### Canvas Primitives
 
 ```go
 canvas.NewRectangle(color)
-canvas.NewSquare(color)                                    // v2.7+ 正方形
+canvas.NewSquare(color)                                    // v2.7+ square
 canvas.NewCircle(color)
-canvas.NewLine(color)                          // 必须 *canvas.Line
-canvas.NewText("text", color)                  // 必须 *canvas.Text
+canvas.NewLine(color)                          // MUST use *canvas.Line
+canvas.NewText("text", color)                  // MUST use *canvas.Text
 canvas.NewImageFromResource(res)
 canvas.NewImageFromFile(path)
-canvas.NewImageFromImage(img)                  // 从 image.Image
+canvas.NewImageFromImage(img)                  // from image.Image
 canvas.NewImageFromReader(reader, name)
 canvas.NewRaster(width, height, drawFn)
 canvas.NewRasterWithDetails(w, h, pxColorFn)
@@ -209,43 +209,43 @@ canvas.NewHorizontalGradient(start, end)
 canvas.NewVerticalGradient(start, end)
 canvas.NewRadialGradient(center, radius)
 canvas.NewCircleGradient(center, radius)
-canvas.NewPolygon(sides, color)                            // v2.7+ 正多边形
-canvas.NewRegularPolygon(sides, color)                     // v2.7+ 正多边形（居中）
+canvas.NewPolygon(sides, color)                            // v2.7+ regular polygon
+canvas.NewRegularPolygon(sides, color)                     // v2.7+ regular polygon (centered)
 canvas.NewArbitraryPolygon(points...)
-canvas.NewArc(startAngle, endAngle, cutoutRatio, color)    // v2.7+ 圆弧（0=扇形, 0.5=环形, 1=缩为点）
-canvas.NewPieArc(startAngle, endAngle, color)              // v2.7+ 扇形（cutout=0）
-canvas.NewDoughnutArc(startAngle, endAngle, color)         // v2.7+ 环形（cutout=0.5）
-canvas.NewBezierCurve(p0, p1, p2)             // 贝塞尔曲线
-canvas.NewBlur(target)                         // 模糊效果（需 GPU 支持）
+canvas.NewArc(startAngle, endAngle, cutoutRatio, color)    // v2.7+ arc (0=pie, 0.5=doughnut, 1=point)
+canvas.NewPieArc(startAngle, endAngle, color)              // v2.7+ pie slice (cutout=0)
+canvas.NewDoughnutArc(startAngle, endAngle, color)         // v2.7+ doughnut (cutout=0.5)
+canvas.NewBezierCurve(p0, p1, p2)             // bezier curve
+canvas.NewBlur(target)                         // blur effect (requires GPU)
 ```
 
-### Rectangle 属性 (v2.7+)
+### Rectangle Properties (v2.7+)
 
 ```go
 rect := canvas.NewRectangle(color)
-rect.CornerRadius = 10              // 统一圆角
-rect.TopLeftCornerRadius = 8        // 四角独立圆角
+rect.CornerRadius = 10              // uniform radius
+rect.TopLeftCornerRadius = 8        // per-corner radius
 rect.TopRightCornerRadius = 8
 rect.BottomLeftCornerRadius = 4
 rect.BottomRightCornerRadius = 4
-rect.Aspect = 1.6                   // 宽高比约束（非零时约束最终尺寸）
-// CornerRadius = min(width,height)/2 → "pill" 胶囊形
+rect.Aspect = 1.6                   // aspect ratio (constrains size when non-zero)
+// CornerRadius = min(width,height)/2 → "pill" shape
 ```
 
-### ImageFill 模式 (v2.7+)
+### ImageFill Modes (v2.7+)
 
 ```go
 img := canvas.NewImageFromFile("photo.jpg")
-img.FillMode = canvas.ImageFillStretch    // 拉伸填充（默认）
-img.FillMode = canvas.ImageFillContain   // 适配（保持比例，可能留白）
-img.FillMode = canvas.ImageFillOriginal  // 原始尺寸（容器适配图片）
-img.FillMode = canvas.ImageFillCover     // 覆盖（保持比例裁剪填满）
-img.CornerRadius = 8                     // 图片圆角
+img.FillMode = canvas.ImageFillStretch    // stretch to fill (default)
+img.FillMode = canvas.ImageFillContain   // fit (maintain aspect, may leave gaps)
+img.FillMode = canvas.ImageFillOriginal  // original size (container fits image)
+img.FillMode = canvas.ImageFillCover     // cover (crop to fill while maintaining aspect)
+img.CornerRadius = 8                     // image corner radius
 ```
 
-## 数据绑定 API
+## Data Binding API
 
-### 值类型
+### Value Types
 
 ```go
 binding.NewBool()              → Bool
@@ -255,10 +255,10 @@ binding.NewString()            → String
 binding.NewURI()               → URI
 binding.NewUntyped()           → Untyped (any)
 
-// 方法：Get() / Set(val) / AddListener(l) / RemoveListener(l)
+// Methods: Get() / Set(val) / AddListener(l) / RemoveListener(l)
 ```
 
-### 集合类型
+### Collection Types
 
 ```go
 binding.NewBoolList()          → BoolList
@@ -266,10 +266,10 @@ binding.NewFloatList()         → FloatList
 binding.NewIntList()           → IntList
 binding.NewStringList()        → StringList
 
-// 方法：Get() / Set([]T) / GetValue(index) / SetValue(index, val) / Append / Length
+// Methods: Get() / Set([]T) / GetValue(index) / SetValue(index, val) / Append / Length
 ```
 
-### 外部绑定
+### External Bindings
 
 ```go
 binding.BindBool(&var)         → ExternalBool
@@ -278,10 +278,10 @@ binding.BindInt(&var)          → ExternalInt
 binding.BindString(&var)       → ExternalString
 binding.BindUntyped(&var)      → ExternalUntyped
 
-// 注意：修改外部变量后需调用 .Reload() 通知监听器
+// Note: call .Reload() after modifying the external variable to notify listeners
 ```
 
-### 集合外部绑定
+### Collection External Bindings
 
 ```go
 binding.BindBoolList(&var)
@@ -290,7 +290,7 @@ binding.BindIntList(&var)
 binding.BindStringList(&var)
 ```
 
-### 转换器
+### Converters
 
 ```go
 binding.IntToString(Int)            → String
@@ -303,54 +303,54 @@ binding.URIToString(URI)            → String
 binding.StringToURI(String)         → URI
 binding.FormatFloat(Float, format)  → String
 binding.FormatInt(Int, format)      → String
-binding.SPrintf(format, args...)    → String (通用格式化)
+binding.SPrintf(format, args...)    → String (generic formatting)
 ```
 
-### Preferences 绑定
+### Preferences Bindings
 
 ```go
-binding.BindPreferenceBool(key, prefs)  → Bool (与 Preferences 双向同步)
+binding.BindPreferenceBool(key, prefs)  → Bool (two-way sync with Preferences)
 binding.BindPreferenceFloat(key, prefs) → Float
 binding.BindPreferenceInt(key, prefs)   → Int
 binding.BindPreferenceString(key, prefs)→ String
 ```
 
-### 树/映射绑定
+### Tree/Map Bindings
 
 ```go
 binding.NewStringTree()
 binding.NewStringMap()
 ```
 
-## 事件接口
+## Event Interfaces
 
 ```go
-// 指针事件
+// Pointer events
 Tappable          interface { Tapped(*PointEvent) }
 DoubleTappable    interface { DoubleTapped(*PointEvent) }
 SecondaryTappable interface { TappedSecondary(*PointEvent) }
 
-// 键盘事件
+// Keyboard events
 Focusable         interface { FocusGained(); FocusLost(); TypedRune(rune); TypedKey(*KeyEvent) }
 Tabbable          interface { AcceptsTab() bool }
 
-// 其他
+// Other
 Scrollable        interface { Scrolled(*ScrollEvent) }
 Draggable         interface { Dragged(*DragEvent); DragEnd() }
 Disableable       interface { Enable(); Disable(); Disabled() bool }
 Shortcutable      interface { TypedShortcut(Shortcut) }
 ```
 
-### 事件结构体
+### Event Structs
 
 ```go
 type PointEvent struct {
     AbsolutePosition Position
-    Position         Position    // 相对触发对象的坐标
+    Position         Position    // relative to the triggered object
 }
 
 type KeyEvent struct {
-    Name     KeyName            // 跨平台键名
+    Name     KeyName            // cross-platform key name
     Physical HardwareKey
 }
 
@@ -365,14 +365,14 @@ type DragEvent struct {
 }
 ```
 
-### KeyName 常量
+### KeyName Constants
 
-方向键：`KeyUp, KeyDown, KeyLeft, KeyRight`
-功能键：`KeyF1..KeyF12, KeyEscape, KeyReturn, KeyTab, KeyBackspace, KeyInsert, KeyDelete`
-导航键：`KeyPageUp, KeyPageDown, KeyHome, KeyEnd, KeySpace, KeyEnter`
-字母键：`KeyA..KeyZ`
-数字键：`Key0..Key9`
-符号键：`KeyApostrophe, KeyComma, KeyMinus, KeyPeriod, KeySlash, KeyBackslash, KeyLeftBracket, KeyRightBracket, KeySemicolon, KeyEqual, KeyBackTick`
+Direction: `KeyUp, KeyDown, KeyLeft, KeyRight`
+Function: `KeyF1..KeyF12, KeyEscape, KeyReturn, KeyTab, KeyBackspace, KeyInsert, KeyDelete`
+Navigation: `KeyPageUp, KeyPageDown, KeyHome, KeyEnd, KeySpace, KeyEnter`
+Letters: `KeyA..KeyZ`
+Digits: `Key0..Key9`
+Symbols: `KeyApostrophe, KeyComma, KeyMinus, KeyPeriod, KeySlash, KeyBackslash, KeyLeftBracket, KeyRightBracket, KeySemicolon, KeyEqual, KeyBackTick`
 
 ### KeyModifier
 
@@ -383,7 +383,7 @@ KeyModifierAlt
 KeyModifierSuper
 ```
 
-## 快捷键
+## Shortcuts
 
 ```go
 type Shortcut interface { ShortcutName() string }
@@ -393,7 +393,7 @@ type KeyboardShortcut interface {
     Mod() KeyModifier
 }
 
-// 内置快捷键
+// Built-in shortcuts
 &ShortcutCopy{Clipboard}
 &ShortcutPaste{Clipboard}
 &ShortcutCut{Clipboard}
@@ -401,47 +401,47 @@ type KeyboardShortcut interface {
 &ShortcutUndo{}
 &ShortcutRedo{}
 
-// Canvas 级快捷键
+// Canvas-level shortcuts
 canvas.AddShortcut(shortcut, handler)
 canvas.RemoveShortcut(shortcut)
 ```
 
-## 对话框 API
+## Dialog API
 
 ```go
-// 信息类
+// Information
 dialog.ShowInformation(title, msg, parent)
 dialog.ShowError(err, parent)
 dialog.ShowConfirm(title, msg, callback, parent)
 
-// 输入类
+// Input
 dialog.ShowEntry(title, msg, parent)
 dialog.ShowText(title, msg, parent)
 dialog.ShowForm(title, submit, cancel, items, callback, parent)
 dialog.ShowCustom(title, dismiss, content, parent)
 
-// 文件类
+// File
 dialog.ShowFileOpen(callback, parent)
 dialog.ShowFileSave(callback, parent)
 dialog.ShowFolderOpen(callback, parent)
 
-// 颜色
+// Color
 dialog.ShowColorPicker(title, msg, callback, parent)
 
-// 进度
+// Progress
 dialog.NewProgress(title, msg, parent)
 dialog.NewProgressInfinite(title, msg, parent)
 ```
 
-## 菜单 API
+## Menu API
 
 ```go
-// 菜单项
+// Menu items
 fyne.NewMenuItem(label, action)
 fyne.NewMenuItemWithIcon(label, icon, action)
 fyne.NewMenuItemSeparator()
 
-// MenuItem 属性
+// MenuItem properties
 item.ChildMenu = subMenu
 item.Icon = iconResource
 item.Shortcut = shortcut
@@ -449,32 +449,32 @@ item.Disabled = true
 item.Checked = true
 item.IsQuit = true
 
-// 菜单
+// Menus
 fyne.NewMenu(label, items...)
 menu.Refresh()
 
-// 主菜单栏
+// Main menu bar
 mainMenu := fyne.NewMainMenu(menus...)
 window.SetMainMenu(mainMenu)
 mainMenu.Refresh()
 ```
 
-## 菜单/对话框关闭时信号（v2.6+）
+## Menu/Dialog Close Signal (v2.6+)
 
 ```go
 menuItem.Action = func() { ... }
-// 未设置 Action 时，带 Shortcut 的菜单项会自动触发对应 Shortcut
+// If no Action is set, menu items with Shortcuts automatically trigger the Shortcut
 ```
 
-## App 接口
+## App Interface
 
 ```go
-app.New()                                    // 创建应用
-app.NewWithID("com.example.app")            // 带唯一 ID
+app.New()                                    // create app
+app.NewWithID("com.example.app")            // with unique ID
 
-// App 方法
+// App methods
 app.NewWindow(title) Window
-app.Run()                                    // 阻塞，启动事件循环
+app.Run()                                    // blocking, starts event loop
 app.Quit()
 app.Driver() Driver
 app.Settings() Settings
@@ -495,7 +495,7 @@ app.Metadata() AppMetadata
 app.UniqueID() string
 ```
 
-## Window 接口
+## Window Interface
 
 ```go
 window.Title() string
@@ -515,8 +515,8 @@ window.SetMaster()
 window.MainMenu() *MainMenu
 window.SetMainMenu(*MainMenu)
 window.SetOnClosed(func())
-window.SetCloseIntercept(func())          // 拦截关闭，需手动 window.Close()
-window.SetOnDropped(func(Position, []URI))  // 拖放回调
+window.SetCloseIntercept(func())          // intercept close, manually call window.Close()
+window.SetOnDropped(func(Position, []URI))  // drop callback
 window.Show()
 window.Hide()
 window.Close()
@@ -524,10 +524,10 @@ window.ShowAndRun()                       // Show() + Run()
 window.Content() CanvasObject
 window.SetContent(CanvasObject)
 window.Canvas() Canvas
-window.Clipboard() Clipboard              // Deprecated: 用 App.Clipboard()
+window.Clipboard() Clipboard              // Deprecated: use App.Clipboard()
 ```
 
-## Canvas 接口
+## Canvas Interface
 
 ```go
 canvas.Content() CanvasObject
@@ -565,42 +565,42 @@ type OverlayStack interface {
 canvas.Overlays().Add(widget.NewPopUp(...))
 ```
 
-### PopUp 组件
+### PopUp Components
 
 ```go
-// Modal 弹窗（遮罩 + 点击外部自动关闭）
+// Modal pop-up (overlay + auto-close on outside click)
 pop := widget.NewModalPopUp(content, canvas)
 pop.Show()
 
-// 普通 PopUp（无遮罩，需手动 Hide）
+// Plain PopUp (no overlay, manual Hide)
 pop := widget.NewPopUp(content, canvas)
 pop.Show()
 pop.Hide()
 
-// 弹出菜单（在指定位置显示）
+// Pop-up menu (shown at a position)
 menu := fyne.NewMenu("", fyne.NewMenuItem("Action", func() {}))
 pop := widget.NewPopUpMenu(menu, canvas)
 pop.ShowAtPosition(fyne.NewPos(100, 200))
 ```
 
-### 桌面扩展 (driver/desktop)
+### Desktop Extensions (driver/desktop)
 
 ```go
 import "fyne.io/fyne/v2/driver/desktop"
 
-// Hoverable 接口（MouseIn / MouseOut / MouseMoved）
-// 自定义 Widget 实现此接口即可响应鼠标悬停
-func (w *MyWidget) MouseIn(ev *desktop.MouseEvent)   { /* 鼠标进入 */ }
-func (w *MyWidget) MouseOut()                         { /* 鼠标离开 */ }
-func (w *MyWidget) MouseMoved(ev *desktop.MouseEvent) { /* 鼠标移动 */ }
+// Hoverable interface (MouseIn / MouseOut / MouseMoved)
+// Custom Widgets implement this to respond to mouse hover
+func (w *MyWidget) MouseIn(ev *desktop.MouseEvent)   { /* mouse enter */ }
+func (w *MyWidget) MouseOut()                         { /* mouse leave */ }
+func (w *MyWidget) MouseMoved(ev *desktop.MouseEvent) { /* mouse move */ }
 
-// 自定义桌面快捷键
+// Custom desktop shortcuts
 canvas.AddShortcut(&desktop.CustomShortcut{
     KeyName:  fyne.KeyS,
     Modifier: desktop.KeyModifierControl | desktop.KeyModifierShift,
 }, func(shortcut fyne.Shortcut) { /* Save As... */ })
 
-// 系统托盘
+// System tray
 if desk, ok := app.(desktop.App); ok {
     desk.SetSystemTrayMenu(fyne.NewMenu("Tray",
         fyne.NewMenuItem("Show", func() { w.Show() }),
@@ -609,14 +609,14 @@ if desk, ok := app.(desktop.App); ok {
 }
 ```
 
-### 迁移检查
+### Migration Checks
 
 ```bash
-# 扫描已废弃 API
+# Scan for deprecated APIs
 rg "NewContainer\b" .                  # → container.New / NewWithoutLayout
 rg "NewContainerWithLayout\b" .        # → container.New
-rg "DarkTheme\|LightTheme" .           # → theme.DefaultTheme()（v3.0 移除）
-rg "fyne\.Do\b" .                      # v2.6+ 检查是否在主 goroutine 误用
+rg "DarkTheme\|LightTheme" .           # → theme.DefaultTheme() (removed in v3.0)
+rg "fyne\.Do\b" .                      # v2.6+ check for misuse on main goroutine
 ```
 
 ## Geometry
@@ -669,7 +669,7 @@ fyne.IsVertical(orient) bool
 fyne.IsHorizontal(orient) bool
 ```
 
-## 资源
+## Resources
 
 ```go
 type Resource interface {
@@ -682,17 +682,17 @@ type ThemedResource interface {      // v2.5+
     ThemeColorName() ThemeColorName
 }
 
-// 创建资源
+// Creating resources
 fyne.NewStaticResource(name, content []byte)
 fyne.LoadResourceFromPath(path)
 fyne.LoadResourceFromURLString(url)
-fyne.CacheResourceFromURLString(url) // v2.8+ 自动缓存
+fyne.CacheResourceFromURLString(url) // v2.8+ auto-cache
 
-// 嵌入资源
+// Embedding resources
 //go:generate fyne bundle -o bundled.go icon.png
 ```
 
-## 偏好存储
+## Preferences
 
 ```go
 prefs := app.Preferences()
@@ -700,7 +700,7 @@ prefs.Bool(key) / SetBool(key, val) / BoolWithFallback(key, fallback)
 prefs.Int(key) / SetInt(key, val) / IntWithFallback(key, fallback)
 prefs.Float(key) / SetFloat(key, val) / FloatWithFallback(key, fallback)
 prefs.String(key) / SetString(key, val) / StringWithFallback(key, fallback)
-// v2.4+ 列表
+// v2.4+ lists
 prefs.BoolList(key) / SetBoolList(key, val) / BoolListWithFallback(key, fallback)
 prefs.FloatList(key) / SetFloatList(key, val) / FloatListWithFallback(key, fallback)
 prefs.IntList(key) / SetIntList(key, val) / IntListWithFallback(key, fallback)
@@ -710,7 +710,7 @@ prefs.AddChangeListener(func())
 prefs.ChangeListeners() []func()
 ```
 
-## 存储
+## Storage
 
 ```go
 type Storage interface {
@@ -719,12 +719,12 @@ type Storage interface {
     Open(name string) (URIReadCloser, error)
     Save(name string) (URIWriteCloser, error)
     Remove(name string) error
-    RemoveAll(name string) error  // v2.7+ 递归删除
+    RemoveAll(name string) error  // v2.7+ recursive delete
     List() []string
 }
 ```
 
-## 动画
+## Animations
 
 ```go
 type Animation struct {
@@ -738,82 +738,82 @@ type Animation struct {
 fyne.NewAnimation(duration, tickFn)
 anim.Start() / anim.Stop()
 
-// 内置曲线
+// Built-in curves
 fyne.AnimationLinear
 fyne.AnimationEaseIn
 fyne.AnimationEaseOut
-fyne.AnimationEaseInOut  // 默认
+fyne.AnimationEaseInOut  // default
 fyne.AnimationRepeatForever // = -1
 ```
 
-## 关键函数
+## Key Functions
 
 ```go
-// 线程调度
-fyne.Do(fn)              // 非阻塞，调度到主 goroutine
-fyne.DoAndWait(fn)       // 阻塞，等待 fn 执行完
+// Thread dispatch
+fyne.Do(fn)              // non-blocking, dispatch to main goroutine
+fyne.DoAndWait(fn)       // blocking, wait for fn to complete
 
-// 应用
+// App
 fyne.CurrentApp() App
 fyne.CurrentDevice() Device
 
-// 日志
+// Logging
 fyne.LogError(reason, err)
 
-// 通知
+// Notifications
 fyne.NewNotification(title, content)
 
-// 数学
+// Math
 fyne.Min(a, b float32) float32
 fyne.Max(a, b float32) float32
 ```
 
-## 样式与主题
+## Theme & Styling
 
-### TextStyle — 文本样式
+### TextStyle
 
 ```go
 type TextStyle struct {
-    Bold          bool  // 粗体
-    Italic        bool  // 斜体
-    Monospace     bool  // 等宽字体
-    Symbol        bool  // 符号字体（v2.2+）
-    TabWidth      int   // Tab 宽度（空格数，v2.1+）
-    Underline     bool  // 下划线（v2.5+）
-    Strikethrough bool  // 删除线（v2.8+）
+    Bold          bool  // bold
+    Italic        bool  // italic
+    Monospace     bool  // monospace font
+    Symbol        bool  // symbol font (v2.2+)
+    TabWidth      int   // tab width in spaces (v2.1+)
+    Underline     bool  // underline (v2.5+)
+    Strikethrough bool  // strikethrough (v2.8+)
 }
 ```
 
-### TextAlign — 文本对齐
+### TextAlign
 
 ```go
 TextAlignLeading  / TextAlignCenter / TextAlignTrailing
 ```
 
-### TextWrap — 文本换行
+### TextWrap
 
 ```go
-TextWrapOff      // 不换行，撑开宽度
-TextWrapBreak    // 按字符换行
-TextWrapWord     // 按单词换行
+TextWrapOff      // no wrap, expand width
+TextWrapBreak    // wrap by character
+TextWrapWord     // wrap by word
 ```
 
-### TextTruncation — 文本截断（v2.4+）
+### TextTruncation (v2.4+)
 
 ```go
-TextTruncateOff       // 不截断（默认）
-TextTruncateClip      // 裁切
-TextTruncateEllipsis  // 结尾加省略号
+TextTruncateOff       // no truncation (default)
+TextTruncateClip      // clip
+TextTruncateEllipsis  // add ellipsis at end
 ```
 
-### fyne.MeasureText — 测量文本尺寸
+### fyne.MeasureText
 
 ```go
 size := fyne.MeasureText("Hello", 14, fyne.TextStyle{Bold: true})
-// 返回 fyne.Size{Width, Height}
+// returns fyne.Size{Width, Height}
 ```
 
-### Theme 接口
+### Theme Interface
 
 ```go
 type Theme interface {
@@ -827,192 +827,192 @@ type Theme interface {
 ### ThemeVariant
 
 ```go
-theme.VariantLight  // 浅色
-theme.VariantDark   // 深色
+theme.VariantLight  // light
+theme.VariantDark   // dark
 ```
 
-### 获取当前主题
+### Getting Current Theme
 
 ```go
-theme.Current()                // 获取当前应用主题
-theme.CurrentForWidget(w)      // 获取指定 Widget 的主题（考虑 ThemeOverride）
+theme.Current()                // get current app theme
+theme.CurrentForWidget(w)      // get theme for a specific Widget (considers ThemeOverride)
 ```
 
-### 主题便捷函数（v2.5+，可直接用，无需获取 Theme 对象）
+### Theme Convenience Functions (v2.5+, use directly without Theme object)
 
 ```go
-theme.Color(name)              // 当前主题颜色
-theme.ColorForWidget(name, w)  // 指定 Widget 主题颜色
-theme.Size(name)               // 当前主题尺寸
-theme.SizeForWidget(name, w)   // 指定 Widget 主题尺寸
-theme.Font(style)              // 当前主题字体
+theme.Color(name)              // current theme color
+theme.ColorForWidget(name, w)  // Widget-specific theme color
+theme.Size(name)               // current theme size
+theme.SizeForWidget(name, w)   // Widget-specific theme size
+theme.Font(style)              // current theme font
 ```
 
-### 预定义主题
+### Predefined Themes
 
 ```go
-theme.DefaultTheme()    // 自适应浅色/深色（推荐）
-theme.LightTheme()      // 浅色（Deprecated, v3.0 移除）
-theme.DarkTheme()       // 深色（Deprecated, v3.0 移除）
+theme.DefaultTheme()    // adaptive light/dark (recommended)
+theme.LightTheme()      // light (Deprecated, removed in v3.0)
+theme.DarkTheme()       // dark (Deprecated, removed in v3.0)
 ```
 
-### Primary 色彩名称常量
+### Primary Color Name Constants
 
 ```go
 theme.ColorRed     theme.ColorOrange   theme.ColorYellow
 theme.ColorGreen   theme.ColorBlue     theme.ColorPurple
 theme.ColorBrown   theme.ColorGray
 
-// 获取所有可选颜色名称
+// Get all available color names
 theme.PrimaryColorNames()  // []string
 ```
 
-通过 `app.Settings().PrimaryColor()` 获取/设置用户偏好的主色调。
+Use `app.Settings().PrimaryColor()` to get/set the user's preferred primary color.
 
-### 完整 ThemeColorName 常量列表
+### Complete ThemeColorName Constants
 
 ```go
-// 基础
-theme.ColorNamePrimary              // 主色调
-theme.ColorNameBackground           // 背景
-theme.ColorNameForeground           // 前景（文字/图标）
-theme.ColorNameForegroundOnPrimary  // 主色调上的对比色（v2.5+）
-theme.ColorNameForegroundOnError    // 错误色上的对比色（v2.5+）
-theme.ColorNameForegroundOnSuccess  // 成功色上的对比色（v2.5+）
-theme.ColorNameForegroundOnWarning  // 警告色上的对比色（v2.5+）
+// Basics
+theme.ColorNamePrimary              // primary color
+theme.ColorNameBackground           // background
+theme.ColorNameForeground           // foreground (text/icons)
+theme.ColorNameForegroundOnPrimary  // contrast on primary (v2.5+)
+theme.ColorNameForegroundOnError    // contrast on error (v2.5+)
+theme.ColorNameForegroundOnSuccess  // contrast on success (v2.5+)
+theme.ColorNameForegroundOnWarning  // contrast on warning (v2.5+)
 
-// 交互状态
-theme.ColorNameButton               // 按钮色
-theme.ColorNameDisabledButton       // 禁用态按钮
-theme.ColorNameDisabled             // 禁用态前景
-theme.ColorNameHover                // 悬停高亮
-theme.ColorNamePressed              // 按下高亮
-theme.ColorNameFocus                // 焦点高亮
-theme.ColorNameSelection            // 选中高亮（v2.1+）
+// Interactive states
+theme.ColorNameButton               // button color
+theme.ColorNameDisabledButton       // disabled button
+theme.ColorNameDisabled             // disabled foreground
+theme.ColorNameHover                // hover highlight
+theme.ColorNamePressed              // press highlight
+theme.ColorNameFocus                // focus highlight
+theme.ColorNameSelection            // selection highlight (v2.1+)
 
-// 输入组件
-theme.ColorNameInputBackground      // 输入框背景
-theme.ColorNameInputBorder          // 输入框边框（v2.3+）
-theme.ColorNamePlaceHolder          // 占位符文字
+// Input components
+theme.ColorNameInputBackground      // input background
+theme.ColorNameInputBorder          // input border (v2.3+)
+theme.ColorNamePlaceHolder          // placeholder text
 
-// 语义色
-theme.ColorNameError                // 错误
-theme.ColorNameSuccess              // 成功（v2.3+）
-theme.ColorNameWarning              // 警告（v2.3+）
-theme.ColorNameHyperlink            // 超链接（v2.4+）
+// Semantic colors
+theme.ColorNameError                // error
+theme.ColorNameSuccess              // success (v2.3+)
+theme.ColorNameWarning              // warning (v2.3+)
+theme.ColorNameHyperlink            // hyperlink (v2.4+)
 
-// 组件色
-theme.ColorNameScrollBar            // 滚动条
-theme.ColorNameScrollBarBackground  // 滚动条背景（v2.6+）
-theme.ColorNameShadow               // 阴影
-theme.ColorNameSeparator            // 分割线（v2.3+）
-theme.ColorNameHeaderBackground     // 表格/列表头部背景（v2.4+）
-theme.ColorNameMenuBackground       // 菜单背景（v2.3+）
-theme.ColorNameOverlayBackground    // 浮层背景（对话框等）（v2.3+）
+// Component colors
+theme.ColorNameScrollBar            // scroll bar
+theme.ColorNameScrollBarBackground  // scroll bar background (v2.6+)
+theme.ColorNameShadow               // shadow
+theme.ColorNameSeparator            // separator (v2.3+)
+theme.ColorNameHeaderBackground     // table/list header background (v2.4+)
+theme.ColorNameMenuBackground       // menu background (v2.3+)
+theme.ColorNameOverlayBackground    // overlay background (dialogs etc.) (v2.3+)
 
-// 内嵌窗口（v2.8+）
-theme.ColorNameInnerWindowBorder           // 内嵌窗口边框
-theme.ColorNameInnerWindowBorderInactive   // 非活跃内嵌窗口边框
+// Inner windows (v2.8+)
+theme.ColorNameInnerWindowBorder           // inner window border
+theme.ColorNameInnerWindowBorderInactive   // inactive inner window border
 ```
 
-### 完整 ThemeSizeName 常量列表
+### Complete ThemeSizeName Constants
 
 ```go
-// 文字尺寸
-theme.SizeNameText            // 正文 14px
-theme.SizeNameHeadingText     // 标题 24px（v2.1+）
-theme.SizeNameSubHeadingText  // 副标题 18px（v2.1+）
-theme.SizeNameCaptionText     // 辅助文字 11px
+// Text sizes
+theme.SizeNameText            // body 14px
+theme.SizeNameHeadingText     // heading 24px (v2.1+)
+theme.SizeNameSubHeadingText  // subheading 18px (v2.1+)
+theme.SizeNameCaptionText     // caption 11px
 
-// 间距
-theme.SizeNamePadding              // 外边距 4px
-theme.SizeNameInnerPadding         // 内边距 8px（v2.3+）
-theme.SizeNameLineSpacing          // 行间距 4px（v2.3+）
-theme.SizeNameInlineIcon           // 内嵌图标 20px
-theme.SizeNameSeparatorThickness   // 分割线粗细 1px
+// Spacing
+theme.SizeNamePadding              // outer padding 4px
+theme.SizeNameInnerPadding         // inner padding 8px (v2.3+)
+theme.SizeNameLineSpacing          // line spacing 4px (v2.3+)
+theme.SizeNameInlineIcon           // inline icon 20px
+theme.SizeNameSeparatorThickness   // separator thickness 1px
 
-// 输入组件
-theme.SizeNameInputBorder          // 输入边框 1px
-theme.SizeNameInputRadius          // 输入圆角 5px（v2.4+）
-theme.SizeNameSelectionRadius      // 选中圆角 3px（v2.4+）
+// Input components
+theme.SizeNameInputBorder          // input border 1px
+theme.SizeNameInputRadius          // input radius 5px (v2.4+)
+theme.SizeNameSelectionRadius      // selection radius 3px (v2.4+)
 
-// 滚动条
-theme.SizeNameScrollBar            // 滚动条 12px
-theme.SizeNameScrollBarSmall       // 小滚动条 3px
-theme.SizeNameScrollBarRadius      // 滚动条圆角 3px（v2.5+）
+// Scroll bars
+theme.SizeNameScrollBar            // scroll bar 12px
+theme.SizeNameScrollBarSmall       // small scroll bar 3px
+theme.SizeNameScrollBarRadius      // scroll bar radius 3px (v2.5+)
 
-// 按钮（v2.8+）
-theme.SizeNameButtonRadius         // 按钮圆角 5px
+// Buttons (v2.8+)
+theme.SizeNameButtonRadius         // button radius 5px
 
-// 内嵌窗口（v2.6+）
-theme.SizeNameWindowButtonHeight   // 窗口按钮高度 16px
-theme.SizeNameWindowButtonRadius   // 窗口按钮圆角 8px
-theme.SizeNameWindowButtonIcon     // 窗口按钮图标 14px
-theme.SizeNameWindowTitleBarHeight // 标题栏高度 26px
-theme.SizeNameInnerWindowRadius    // 窗口圆角 5px（v2.8+）
+// Inner windows (v2.6+)
+theme.SizeNameWindowButtonHeight   // window button height 16px
+theme.SizeNameWindowButtonRadius   // window button radius 8px
+theme.SizeNameWindowButtonIcon     // window button icon 14px
+theme.SizeNameWindowTitleBarHeight // title bar height 26px
+theme.SizeNameInnerWindowRadius    // window radius 5px (v2.8+)
 
-// 其它
-theme.SizeNameSplitThickness       // 分割面板厚度（v2.8+）
-theme.SizeNameModalBlurRadius      // 弹窗模糊半径（v2.7+）
+// Other
+theme.SizeNameSplitThickness       // split panel thickness (v2.8+)
+theme.SizeNameModalBlurRadius      // modal blur radius (v2.7+)
 ```
 
-### 尺寸便捷函数
+### Size Convenience Functions
 
 ```go
-theme.Padding()              // 外边距
-theme.InnerPadding()         // 内边距
-theme.TextSize()             // 正文字号
-theme.TextHeadingSize()      // 标题字号
-theme.TextSubHeadingSize()   // 副标题字号
-theme.CaptionTextSize()      // 辅助文字字号
-theme.IconInlineSize()       // 内嵌图标尺寸
-theme.ScrollBarSize()        // 滚动条尺寸
-theme.ScrollBarSmallSize()   // 小滚动条尺寸
-theme.InputBorderSize()      // 输入边框尺寸
-theme.InputRadiusSize()      // 输入圆角尺寸
-theme.SelectionRadiusSize()  // 选中圆角尺寸
-theme.LineSpacing()          // 行间距
-theme.SeparatorThicknessSize() // 分割线粗度
+theme.Padding()              // outer padding
+theme.InnerPadding()         // inner padding
+theme.TextSize()             // body text size
+theme.TextHeadingSize()      // heading text size
+theme.TextSubHeadingSize()   // subheading text size
+theme.CaptionTextSize()      // caption text size
+theme.IconInlineSize()       // inline icon size
+theme.ScrollBarSize()        // scroll bar size
+theme.ScrollBarSmallSize()   // small scroll bar size
+theme.InputBorderSize()      // input border size
+theme.InputRadiusSize()      // input radius size
+theme.SelectionRadiusSize()  // selection radius size
+theme.LineSpacing()          // line spacing
+theme.SeparatorThicknessSize() // separator thickness
 ```
 
-### 完整 ThemeIconName 常量列表
+### Complete ThemeIconName Constants
 
 ```go
-// 导航/操作
+// Navigation / actions
 theme.IconNameCancel        theme.IconNameConfirm      theme.IconNameDelete
 theme.IconNameSearch        theme.IconNameSearchReplace theme.IconNameMenu
 theme.IconNameMenuExpand
 
-// 表单控件
-theme.IconNameCheckButton              // 未选中复选框
-theme.IconNameCheckButtonChecked       // 已选中复选框
-theme.IconNameCheckButtonFill          // 填充复选框（v2.5+）
-theme.IconNameCheckButtonPartial       // 半选（v2.6+）
-theme.IconNameRadioButton              // 未选中单选
-theme.IconNameRadioButtonChecked       // 已选中单选
-theme.IconNameRadioButtonFill          // 填充单选（v2.5+）
+// Form controls
+theme.IconNameCheckButton              // unchecked
+theme.IconNameCheckButtonChecked       // checked
+theme.IconNameCheckButtonFill          // filled (v2.5+)
+theme.IconNameCheckButtonPartial       // partial (v2.6+)
+theme.IconNameRadioButton              // unchecked
+theme.IconNameRadioButtonChecked       // checked
+theme.IconNameRadioButtonFill          // filled (v2.5+)
 
-// 颜色
+// Color
 theme.IconNameColorAchromatic   theme.IconNameColorChromatic   theme.IconNameColorPalette
 
-// 内容操作
+// Content operations
 theme.IconNameContentAdd     theme.IconNameContentRemove    theme.IconNameContentCut
 theme.IconNameContentCopy    theme.IconNameContentPaste     theme.IconNameContentClear
 theme.IconNameContentRedo    theme.IconNameContentUndo
 
-// 状态
+// Status
 theme.IconNameInfo          theme.IconNameQuestion       theme.IconNameWarning
 theme.IconNameError         theme.IconNameBrokenImage    // v2.4+
 
-// 文档
+// Document
 theme.IconNameDocument        theme.IconNameDocumentCreate
 theme.IconNameDocumentPrint   theme.IconNameDocumentSave
 
-// 邮件
+// Mail
 theme.IconNameMailAttachment  theme.IconNameMailCompose   theme.IconNameMailForward
 theme.IconNameMailReply       theme.IconNameMailReplyAll  theme.IconNameMailSend
 
-// 媒体
+// Media
 theme.IconNameMediaMusic       theme.IconNameMediaPhoto       theme.IconNameMediaVideo
 theme.IconNameMediaFastForward theme.IconNameMediaFastRewind
 theme.IconNameMediaPause       theme.IconNameMediaPlay
@@ -1020,32 +1020,32 @@ theme.IconNameMediaSkipNext    theme.IconNameMediaSkipPrevious
 theme.IconNameMediaRecord      theme.IconNameMediaReplay
 theme.IconNameMediaStop
 
-// 导航
+// Navigation
 theme.IconNameNavigateBack     theme.IconNameNavigateNext
 theme.IconNameArrowDropDown    theme.IconNameArrowDropUp
 theme.IconNameMoreHorizontal   theme.IconNameMoreVertical
 
-// 文件
+// File
 theme.IconNameFile             theme.IconNameFileApplication
 theme.IconNameFileAudio        theme.IconNameFileImage
 theme.IconNameFileVideo        theme.IconNameFileText
 
-// 视图
+// View
 theme.IconNameViewFullScreen   theme.IconNameViewRefresh
 theme.IconNameViewZoomFit      theme.IconNameViewZoomIn
 theme.IconNameViewZoomOut
 
-// 账户
+// Account
 theme.IconNameAccount          theme.IconNameLogin
 theme.IconNameLogout
 
-// 列表
+// List
 theme.IconNameList             theme.IconNameGrid
 
-// 内嵌窗口（v2.5+）
+// Inner windows (v2.5+)
 theme.IconNameDragCornerIndicator
 
-// 其他
+// Other
 theme.IconNameComputer         theme.IconNameDownload
 theme.IconNameFavorite         theme.IconNameHelp
 theme.IconNameHome             theme.IconNameMove
@@ -1055,7 +1055,7 @@ theme.IconNameVisibilityOff    theme.IconNameVolumeDown
 theme.IconNameVolumeMute       theme.IconNameVolumeUp
 ```
 
-### 图标便捷函数（返回 fyne.Resource）
+### Icon Convenience Functions (return fyne.Resource)
 
 ```go
 theme.CancelIcon()               theme.ConfirmIcon()
@@ -1089,18 +1089,18 @@ theme.ListIcon()                 theme.GridIcon()
 theme.VisibilityIcon()           theme.VisibilityOffIcon()
 ```
 
-### 字体便捷函数
+### Font Convenience Functions
 
 ```go
-theme.TextFont()                // 常规字体
-theme.TextBoldFont()            // 粗体
-theme.TextItalicFont()          // 斜体
-theme.TextBoldItalicFont()      // 粗斜体
-theme.TextMonospaceFont()       // 等宽字体
-theme.SymbolFont()              // 符号字体
-theme.DefaultEmojiFont()        // Emoji 字体
+theme.TextFont()                // regular font
+theme.TextBoldFont()            // bold
+theme.TextItalicFont()          // italic
+theme.TextBoldItalicFont()      // bold italic
+theme.TextMonospaceFont()       // monospace
+theme.SymbolFont()              // symbol font
+theme.DefaultEmojiFont()        // emoji font
 
-// 默认字体资源
+// Default font resources
 theme.DefaultTextFont()
 theme.DefaultTextBoldFont()
 theme.DefaultTextBoldItalicFont()
@@ -1109,15 +1109,15 @@ theme.DefaultTextMonospaceFont()
 theme.DefaultSymbolFont()
 ```
 
-### 自定义字体（环境变量）
+### Custom Fonts (Environment Variables)
 
 ```bash
-FYNE_FONT=/path/to/font.ttf         # 主字体
-FYNE_FONT_MONOSPACE=/path/to/mono.ttf  # 等宽字体
-FYNE_FONT_SYMBOL=/path/to/symbol.ttf   # 符号字体
+FYNE_FONT=/path/to/font.ttf         # main font
+FYNE_FONT_MONOSPACE=/path/to/mono.ttf  # monospace font
+FYNE_FONT_SYMBOL=/path/to/symbol.ttf   # symbol font
 ```
 
-### 完整自定义主题模板
+### Full Custom Theme Template
 
 ```go
 type MyTheme struct{}
@@ -1132,13 +1132,13 @@ func (t MyTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.Colo
         }
         return color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 255}
     default:
-        return theme.DefaultTheme().Color(name, v) // 回退到默认
+        return theme.DefaultTheme().Color(name, v) // fallback to default
     }
 }
 
 func (t MyTheme) Font(style fyne.TextStyle) fyne.Resource {
     if style.Monospace {
-        return resourceMyMonoFont  // 自定义等宽字体
+        return resourceMyMonoFont  // custom monospace font
     }
     return theme.DefaultTheme().Font(style)
 }
@@ -1150,7 +1150,7 @@ func (t MyTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 func (t MyTheme) Size(name fyne.ThemeSizeName) float32 {
     switch name {
     case theme.SizeNameText:
-        return 16 // 自定义正文字号
+        return 16 // custom body text size
     case theme.SizeNamePadding:
         return 6
     default:
@@ -1159,12 +1159,12 @@ func (t MyTheme) Size(name fyne.ThemeSizeName) float32 {
 }
 ```
 
-### 应用主题
+### Applying Themes
 
 ```go
-// 全局主题
+// Global theme
 a.Settings().SetTheme(&MyTheme{})
 
-// 局部主题覆写（仅影响容器内的子树）
+// Local theme override (only affects subtree within container)
 container.NewThemeOverride(&MyTheme{}, content)
 ```

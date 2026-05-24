@@ -1,106 +1,106 @@
-# 测试完整指南
+# Complete Testing Guide
 
-## 目录
+## Table of Contents
 
-- [测试环境创建](#测试环境创建)
-- [模拟用户交互](#模拟用户交互)
-- [验证渲染结果](#验证渲染结果)
-- [完整测试示例](#完整测试示例)
-- [CI 集成](#ci-集成)
-- [测试最佳实践](#测试最佳实践)
-- [特性测试示例](#特性测试示例)
+- [Creating a Test Environment](#creating-a-test-environment)
+- [Simulating User Interaction](#simulating-user-interaction)
+- [Verifying Rendering Results](#verifying-rendering-results)
+- [Complete Test Examples](#complete-test-examples)
+- [CI Integration](#ci-integration)
+- [Testing Best Practices](#testing-best-practices)
+- [Feature-Specific Test Examples](#feature-specific-test-examples)
 
 ---
 
-`fyne.io/fyne/v2/test` 包提供纯内存中的 UI 测试能力，无需图形驱动。
+The `fyne.io/fyne/v2/test` package provides pure in-memory UI testing — no graphics driver required.
 
-## 测试环境创建
+## Creating a Test Environment
 
 ```go
 import "fyne.io/fyne/v2/test"
 
-// 创建内存 Canvas
+// Create an in-memory Canvas
 c := test.NewCanvas()
 c.SetContent(myWidget)
 c.Resize(fyne.NewSize(400, 300))
 
-// 创建内存 App（含 Preferences、Storage、Clipboard）
+// Create an in-memory App (includes Preferences, Storage, Clipboard)
 a := test.NewApp()
 w := a.NewWindow("Test")
 ```
 
-## 模拟用户交互
+## Simulating User Interaction
 
-### 点击
+### Taps
 
 ```go
-// 对 Tappable 对象点击
+// Tap a Tappable object
 test.Tap(btn)
 
-// 指定位置点击
+// Tap at a specific position
 test.TapAt(widget, fyne.NewPos(10, 10))
 
-// Canvas 绝对坐标点击
+// Tap at absolute canvas coordinates
 test.TapCanvas(canvas, fyne.NewPos(100, 50))
 
-// 双击
+// Double-tap
 test.DoubleTap(btn)
 
-// 右键点击
+// Right-click
 test.TapSecondary(widget)
 test.TapSecondaryAt(widget, fyne.NewPos(5, 5))
 ```
 
-### 键盘输入
+### Keyboard Input
 
 ```go
-// 先 FocusGained，再逐字符输入
+// FocusGained first, then rune by rune
 test.Type(entry, "Hello World")
 
-// Canvas 级别的输入（触发 OnTypedRune）
+// Canvas-level input (triggers OnTypedRune)
 test.TypeOnCanvas(canvas, "text")
 ```
 
-### 拖动与滚动
+### Drag & Scroll
 
 ```go
-// 从 pos 开始拖动 deltaX, deltaY
+// Drag from pos by deltaX, deltaY
 test.Drag(canvas, fyne.NewPos(50, 50), 30, 10)
 
-// 滚动
-test.Scroll(canvas, fyne.NewPos(100, 100), 0, -50) // 向上滚动
+// Scroll
+test.Scroll(canvas, fyne.NewPos(100, 100), 0, -50) // scroll up
 ```
 
-### 鼠标移动
+### Mouse Movement
 
 ```go
-// 模拟鼠标移动（触发 Hoverable.MouseIn/MouseMoved/MouseOut）
+// Simulate mouse movement (triggers Hoverable.MouseIn/MouseMoved/MouseOut)
 test.MoveMouse(canvas, fyne.NewPos(100, 100))
 ```
 
-### 焦点控制
+### Focus Control
 
 ```go
 test.FocusNext(canvas)
 test.FocusPrevious(canvas)
 ```
 
-## 验证渲染结果
+## Verifying Rendering Results
 
-### 通过 WidgetRenderer
+### Via WidgetRenderer
 
 ```go
 func TestLabelText(t *testing.T) {
     label := widget.NewLabel("Hello")
     r := test.WidgetRenderer(label)
 
-    // 检查渲染对象数量
+    // Check render object count
     objs := r.Objects()
     if len(objs) != 1 {
         t.Fatalf("expected 1 object, got %d", len(objs))
     }
 
-    // 检查渲染对象内容
+    // Check render object content
     text := objs[0].(*canvas.Text)
     if text.Text != "Hello" {
         t.Errorf("expected 'Hello', got '%s'", text.Text)
@@ -108,32 +108,32 @@ func TestLabelText(t *testing.T) {
 }
 ```
 
-### RenderToMarkup（v2.6.0+）
+### RenderToMarkup (v2.6.0+)
 
 ```go
-// 对象级别快照
+// Object-level snapshot
 markup := test.RenderObjectToMarkup(myWidget)
 if !strings.Contains(markup, "expected text") {
     t.Error("text not found in markup")
 }
 
-// Canvas 级别快照
+// Canvas-level snapshot
 snapshot := test.RenderToMarkup(canvas)
 ```
 
-### 检查布局结果
+### Checking Layout Results
 
 ```go
-// LaidOutObjects 返回经过 Layout 后的所有子对象
+// LaidOutObjects returns all children after Layout
 objects := test.LaidOutObjects(container)
 for _, obj := range objects {
     t.Logf("pos=%v size=%v visible=%v", obj.Position(), obj.Size(), obj.Visible())
 }
 ```
 
-## 完整测试示例
+## Complete Test Examples
 
-### Widget 功能测试
+### Widget Function Test
 
 ```go
 func TestButton_Tap(t *testing.T) {
@@ -150,30 +150,30 @@ func TestButton_Tap(t *testing.T) {
 }
 ```
 
-### Widget 渲染测试
+### Widget Rendering Test
 
 ```go
 func TestButton_Layout(t *testing.T) {
     btn := widget.NewButton("Submit", nil)
     r := test.WidgetRenderer(btn)
 
-    // 验证最小尺寸
+    // Verify minimum size
     min := r.MinSize()
     if min.Width <= 0 || min.Height <= 0 {
         t.Error("MinSize should be positive")
     }
 
-    // 设置尺寸后验证
+    // Verify after setting size
     r.Layout(fyne.NewSize(200, 40))
     objs := r.Objects()
-    // objs[0] 是背景，objs[1] 是文本
+    // objs[0] is background, objs[1] is text
     if objs[0].Size().Width != 200 {
         t.Error("background should fill widget")
     }
 }
 ```
 
-### 自定义 Widget 测试
+### Custom Widget Test
 
 ```go
 func TestMyWidget_Rendering(t *testing.T) {
@@ -186,13 +186,13 @@ func TestMyWidget_Rendering(t *testing.T) {
     r := test.WidgetRenderer(w)
     objs := r.Objects()
 
-    // 验证背景
+    // Verify background
     bg := objs[0].(*canvas.Rectangle)
     if bg.Size().Width != 200 {
         t.Error("background should fill")
     }
 
-    // 验证文字
+    // Verify text
     for _, obj := range objs {
         if text, ok := obj.(*canvas.Text); ok {
             if text.Text != "test" {
@@ -203,7 +203,7 @@ func TestMyWidget_Rendering(t *testing.T) {
 }
 ```
 
-### 数据绑定测试
+### Data Binding Test
 
 ```go
 func TestEntryWithData(t *testing.T) {
@@ -221,7 +221,7 @@ func TestEntryWithData(t *testing.T) {
 }
 ```
 
-### 焦点链测试
+### Focus Chain Test
 
 ```go
 func TestFocusChain(t *testing.T) {
@@ -245,7 +245,7 @@ func TestFocusChain(t *testing.T) {
 }
 ```
 
-### 布局测试
+### Layout Test
 
 ```go
 func TestVBoxLayout(t *testing.T) {
@@ -258,14 +258,14 @@ func TestVBoxLayout(t *testing.T) {
     c.SetContent(box)
     c.Resize(fyne.NewSize(400, 200))
 
-    // 验证 l1 在 l2 上方
+    // Verify l1 is above l2
     if l1.Position().Y >= l2.Position().Y {
         t.Error("l1 should be above l2")
     }
 }
 ```
 
-### 隐藏/显示测试
+### Hide/Show Test
 
 ```go
 func TestHideShow(t *testing.T) {
@@ -286,7 +286,7 @@ func TestHideShow(t *testing.T) {
 }
 ```
 
-### 禁用测试
+### Disable Test
 
 ```go
 func TestDisable(t *testing.T) {
@@ -297,7 +297,7 @@ func TestDisable(t *testing.T) {
         t.Fatal("should be disabled")
     }
 
-    test.Tap(btn) // 禁用的按钮不应触发回调
+    test.Tap(btn) // disabled button should not trigger callback
 
     btn.Enable()
     if btn.Disabled() {
@@ -306,27 +306,27 @@ func TestDisable(t *testing.T) {
 }
 ```
 
-## CI 集成
+## CI Integration
 
 ```bash
-# 使用 ci tag 在 CI 环境运行测试（无图形驱动）
+# Use ci tag to run tests in CI (no graphics driver needed)
 go test -tags ci ./...
 
-# 或仅运行 Fyne 相关测试
+# Or run only Fyne-related tests
 go test -tags ci -run "TestWidget" ./...
 ```
 
-## 测试最佳实践
+## Testing Best Practices
 
-1. **使用 test.NewCanvas()** — 比真实窗口快得多，不需要图形环境
-2. **通过 WidgetRenderer 检查** — 验证渲染对象内容而非手动截图
-3. **测试 MinSize** — 确保在不同布局中都有合理的尺寸
-4. **测试布局行为** — 将 Widget 放入容器，验证 Layout 后的位置和尺寸
-5. **不要用 time.Sleep** — 测试框架中所有操作是同步的
-6. **给测试挂上 ci tag** — `//go:build ci` 确保在 CI 中也能运行
-7. **每个 Widget 至少写 3 类测试**：构造/渲染、交互（Tap/Type）、状态变更（Show/Hide/Enable）
+1. **Use test.NewCanvas()** — much faster than a real window, no graphics environment needed
+2. **Check via WidgetRenderer** — verify render object content rather than manually screenshotting
+3. **Test MinSize** — ensure reasonable dimensions in various layouts
+4. **Test layout behavior** — put Widget in a container, verify position and size after Layout
+5. **Don't use time.Sleep** — all operations in the test framework are synchronous
+6. **Tag tests for CI** — `//go:build ci` ensures they also run in CI
+7. **Write at least 3 kinds of tests per Widget**: construction/rendering, interaction (Tap/Type), state changes (Show/Hide/Enable)
 
-## 特性测试示例
+## Feature-Specific Test Examples
 
 ### Label.Selectable (v2.6+)
 
@@ -344,27 +344,27 @@ func TestLabel_Selectable(t *testing.T) {
         t.Error("no text should be selected initially")
     }
 
-    // 模拟选择操作后验证
-    // 注意：Selection 操作需要完整的焦点和拖拽交互
+    // Simulate selection, then verify
+    // Note: Selection operations require full focus and drag interaction
 }
 ```
 
-### Check.Partial半选态 (v2.6+)
+### Check.Partial (v2.6+)
 
 ```go
 func TestCheck_Partial(t *testing.T) {
     check := widget.NewCheck("Select All", nil)
     
-    // 设置为半选态
+    // Set to partial (indeterminate) state
     check.Partial = true
     check.Refresh()
 
-    // 验证状态
+    // Verify state
     if !check.Partial {
         t.Error("check should be in Partial state")
     }
 
-    // 点击应清除 Partial，切换到 Checked
+    // Tapping should clear Partial and switch to Checked
     test.Tap(check)
     if check.Partial {
         t.Error("tapping should clear Partial state")

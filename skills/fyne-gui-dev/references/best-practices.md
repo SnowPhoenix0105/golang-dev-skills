@@ -1,38 +1,38 @@
-# 最佳实践与使用模式
+# Best Practices & Usage Patterns
 
-## 目录
+## Table of Contents
 
-- [1. 项目结构](#1-项目结构)
-- [2. 布局模式](#2-布局模式)
-- [3. 数据绑定模式](#3-数据绑定模式)
-- [4. 异步操作模式](#4-异步操作模式)
-- [5. 自定义 Widget 深入](#5-自定义-widget-深入)
-- [6. 性能优化](#6-性能优化)
-- [7. 平台适配](#7-平台适配)
-- [8. 窗口管理](#8-窗口管理)
-- [9. 资源管理](#9-资源管理)
-- [10. 对话框模式](#10-对话框模式)
-- [11. Navigation 导航模式](#11-navigation-导航模式)
-- [12. Canvas 样式模式](#12-canvas-样式模式)
-- [13. Label 可选文本](#13-label-可选文本)
-- [14. RowWrap 布局](#14-rowwrap-布局)
+- [1. Project Structure](#1-project-structure)
+- [2. Layout Patterns](#2-layout-patterns)
+- [3. Data Binding Patterns](#3-data-binding-patterns)
+- [4. Async Operation Patterns](#4-async-operation-patterns)
+- [5. Custom Widget In-Depth](#5-custom-widget-in-depth)
+- [6. Performance Optimization](#6-performance-optimization)
+- [7. Platform Adaptation](#7-platform-adaptation)
+- [8. Window Management](#8-window-management)
+- [9. Resource Management](#9-resource-management)
+- [10. Dialog Patterns](#10-dialog-patterns)
+- [11. Navigation Pattern](#11-navigation-pattern)
+- [12. Canvas Styling Patterns](#12-canvas-styling-patterns)
+- [13. Label Selectable Text](#13-label-selectable-text)
+- [14. RowWrap Layout](#14-rowwrap-layout)
 
 ---
 
-## 1. 项目结构
+## 1. Project Structure
 
-推荐的 Fyne 项目结构：
+Recommended Fyne project structure:
 
 ```
 myapp/
-├── main.go              # 入口，app 初始化
-├── FyneApp.toml         # 元数据（ID、版本、图标、构建设置）
+├── main.go              # entry point, app init
+├── FyneApp.toml         # metadata (ID, version, icon, build settings)
 ├── ui/
-│   ├── views/           # 页面/屏幕
-│   ├── widgets/         # 自定义可复用组件
-│   └── theme/           # 自定义主题
-├── model/               # 数据模型和业务逻辑
-├── bindings/            # 响应式数据绑定
+│   ├── views/           # pages/screens
+│   ├── widgets/         # custom reusable components
+│   └── theme/           # custom theme
+├── model/               # data models and business logic
+├── bindings/            # reactive data bindings
 └── go.mod
 ```
 
@@ -47,12 +47,12 @@ myapp/
   Icon = "Icon.png"
 
 [Migrations]
-  fyneDo = true   # v2.6.0+：启用新线程模型
+  fyneDo = true   # v2.6.0+: enable new threading model
 ```
 
-## 2. 布局模式
+## 2. Layout Patterns
 
-### 2.1 基本页面结构
+### 2.1 Basic Page Structure
 
 ```go
 func mainPage() fyne.CanvasObject {
@@ -65,13 +65,13 @@ func mainPage() fyne.CanvasObject {
         header,               // top
         footer,               // bottom
         sidebar,              // left
-        nil,                  // right (不填)
+        nil,                  // right (empty)
         body,                 // center
     )
 }
 ```
 
-### 2.2 表单布局
+### 2.2 Form Layout
 
 ```go
 func formPage() fyne.CanvasObject {
@@ -86,17 +86,17 @@ func formPage() fyne.CanvasObject {
             {Text: "Password", Widget: passwordEntry},
         },
         OnSubmit: func() {
-            // 验证并提交
+            // validate and submit
         },
     }
     return form
 }
 ```
 
-### 2.3 自适应网格（响应式）
+### 2.3 Adaptive Grid (Responsive)
 
 ```go
-// rowcols 是横屏时的列数，竖屏时自动变为行数
+// rowcols is the column count in landscape; becomes row count in portrait
 grid := container.NewAdaptiveGrid(4,
     widget.NewButton("A", nil),
     widget.NewButton("B", nil),
@@ -104,10 +104,10 @@ grid := container.NewAdaptiveGrid(4,
 )
 ```
 
-### 2.4 弹性空间
+### 2.4 Flexible Space
 
 ```go
-// 利用 layout.Spacer 将按钮推到右侧
+// Use layout.Spacer to push buttons to the right
 toolbar := container.NewHBox(
     layout.NewSpacer(),
     widget.NewButton("Save", saveFn),
@@ -115,33 +115,33 @@ toolbar := container.NewHBox(
 )
 ```
 
-### 2.5 固定大小的 sidebar
+### 2.5 Fixed-Width Sidebar
 
 ```go
 sidebar := widget.NewList(/* ... */)
 content := widget.NewLabel("Body")
 
-// 左栏固定宽度，右栏占据剩余
+// Left pane fixed width, right pane fills remaining
 split := container.NewHSplit(sidebar, content)
-split.Offset = 0.2  // 左栏占 20%
+split.Offset = 0.2  // left pane takes 20%
 ```
 
-## 3. 数据绑定模式
+## 3. Data Binding Patterns
 
-### 3.1 双向绑定（输入 ↔ 显示）
+### 3.1 Two-Way Binding (Input ↔ Display)
 
 ```go
 data := binding.NewString()
 data.Set("initial")
 
-// 三个 Widget 共享同一个 data source
+// Three Widgets share the same data source
 input := widget.NewEntryWithData(data)
 preview := widget.NewLabelWithData(data)
 count := widget.NewLabelWithData(
     binding.SPrintf("Length: %d", binding.StringToInt(data)))
 ```
 
-### 3.2 列表绑定
+### 3.2 List Binding
 
 ```go
 items := binding.NewStringList()
@@ -155,14 +155,14 @@ list := widget.NewListWithData(items,
         label.Bind(item.(binding.String))
     })
 
-// 在后台线程更新数据（安全）
+// Update data from background thread (safe)
 go func() {
     results := fetchData()
-    items.Set(results)  // 安全——自动通过 fyne.Do 通知
+    items.Set(results)  // safe — auto-dispatched via fyne.Do
 }()
 ```
 
-### 3.3 外部绑定（绑定到已有变量）
+### 3.3 External Binding (bind to existing variables)
 
 ```go
 type Model struct {
@@ -177,18 +177,18 @@ countBinding := binding.BindInt(&m.Count)
 widget.NewLabelWithData(nameBinding)
 widget.NewLabelWithData(binding.IntToString(countBinding))
 
-// 外部代码修改 m 后，需要通知：
+// After external code modifies m, notify:
 m.Name = "Bob"
-nameBinding.Reload()  // 重要！
+nameBinding.Reload()  // important!
 ```
 
-### 3.4 偏好绑定
+### 3.4 Preference Binding
 
 ```go
 a := app.NewWithID("com.example.app")
 prefs := a.Preferences()
 
-// 与 Preferences 自动双向同步
+// Auto two-way sync with Preferences
 themeBinding := binding.BindPreferenceString("theme", prefs)
 widget.NewSelectWithData(
     []string{"light", "dark"},
@@ -198,9 +198,9 @@ widget.NewSelectWithData(
     })
 ```
 
-## 4. 异步操作模式
+## 4. Async Operation Patterns
 
-### 4.1 后台任务 + UI 更新
+### 4.1 Background Task + UI Update
 
 ```go
 func loadData(progress *widget.ProgressBar, label *widget.Label) {
@@ -221,10 +221,10 @@ func loadData(progress *widget.ProgressBar, label *widget.Label) {
 }
 ```
 
-### 4.2 使用数据绑定代替手动线程调度
+### 4.2 Use Data Binding Instead of Manual Thread Dispatch
 
 ```go
-// 更简洁的方式：用数据绑定
+// Cleaner approach: use data binding
 progress := binding.NewFloat()
 status := binding.NewString()
 
@@ -237,14 +237,14 @@ go func() {
     status.Set("Done!")
 }()
 
-// UI 组件自动响应
+// UI components auto-respond
 widget.NewProgressBarWithData(progress)
 widget.NewLabelWithData(status)
 ```
 
-## 5. 自定义 Widget 深入
+## 5. Custom Widget In-Depth
 
-### 5.1 支持数据绑定的自定义 Widget
+### 5.1 Data-Binding-Aware Custom Widget
 
 ```go
 type ToggleWidget struct {
@@ -263,15 +263,15 @@ func (w *ToggleWidget) Tapped(ev *fyne.PointEvent) {
     if w.OnChanged != nil {
         w.OnChanged(w.Active)
     }
-    w.Refresh()  // 触发渲染器更新
+    w.Refresh()  // trigger renderer update
 }
 ```
 
-### 5.2 支持自定义 Theme 的 Widget
+### 5.2 Theme-Aware Widget
 
 ```go
 func (r *myRenderer) MinSize() fyne.Size {
-    th := r.w.Theme()   // 获取当前 Theme（可能来自 ThemeOverride 容器）
+    th := r.w.Theme()   // get current Theme (may come from ThemeOverride container)
     pad := th.Size(theme.SizeNamePadding)
     textSize := th.Size(theme.SizeNameText)
     return fyne.NewSize(textSize*10+pad*2, textSize+pad*2)
@@ -285,7 +285,7 @@ func (r *myRenderer) Refresh() {
 }
 ```
 
-### 5.3 使用 cache.Renderer 获取子 Widget 渲染器
+### 5.3 Using cache.Renderer for Child Widget Renderers
 
 ```go
 import "fyne.io/fyne/v2/internal/cache"
@@ -296,88 +296,88 @@ func (r *myRenderer) Layout(size fyne.Size) {
 }
 ```
 
-## 6. 性能优化
+## 6. Performance Optimization
 
-### 6.1 虚拟滚动
+### 6.1 Virtual Scrolling
 
-大数据集（>100 行）**必须使用虚拟滚动**：
+Large datasets (>100 rows) **must use virtual scrolling**:
 
 ```go
-// ✅ O(可见行数) 复杂度
+// ✅ O(visible rows) complexity
 list := widget.NewList(dataLen, createTemplate, updateRow)
 
-// ❌ O(总行数) — 会一次性创建所有 Widget
+// ❌ O(total rows) — creates all Widgets at once
 for _, item := range items {
     container.Add(widget.NewLabel(item))
 }
 ```
 
-### 6.2 批量更新
+### 6.2 Batch Updates
 
 ```go
-// ✅ 批量操纵后一次性 Refresh
+// ✅ Batch then single Refresh
 data := binding.NewStringList()
 newItems := fetchItems()
-data.Set(newItems)  // 一次触发
+data.Set(newItems)  // triggers once
 
-// ❌ 循环内逐个触发
+// ❌ Triggers per-item in loop
 for _, item := range items {
-    data.Append(item)  // 每次触发一次 Refresh
+    data.Append(item)  // triggers Refresh each time
 }
 ```
 
-### 6.3 避免不必要的渲染
+### 6.3 Avoid Unnecessary Rendering
 
 ```go
-// Widget 的 Resize 已经做了相等性检查
+// Widget.Resize already does equality check
 func (w *BaseWidget) Resize(size fyne.Size) {
     if size == w.Size() {
-        return  // 尺寸没变，跳过
+        return  // size unchanged, skip
     }
     // ...
 }
 ```
 
-## 7. 平台适配
+## 7. Platform Adaptation
 
-### 7.1 检测设备类型
+### 7.1 Detecting Device Type
 
 ```go
 if fyne.CurrentDevice().IsMobile() {
-    // 移动端特定布局
+    // mobile-specific layout
     w.SetContent(container.NewVBox(/* ... */))
 } else {
-    // 桌面端
+    // desktop
     w.SetContent(container.NewHSplit(sidebar, content))
 }
 
 if fyne.CurrentDevice().IsBrowser() {
-    // WebAssembly 特定处理
+    // WebAssembly-specific handling
 }
 ```
 
-### 7.2 键盘设备判断
+### 7.2 Keyboard Availability Check
 
 ```go
 if fyne.CurrentDevice().HasKeyboard() {
-    // 注册键盘快捷键
+    // register keyboard shortcuts
     w.Canvas().SetOnTypedKey(func(ev *fyne.KeyEvent) {
         // ...
     })
 }
 ```
 
-## 8. 窗口管理
+## 8. Window Management
 
-### 8.1 多窗口
+### 8.1 Multiple Windows
 
 ```go
 a := app.New()
 mainWin := a.NewWindow("Main")
 settingsWin := a.NewWindow("Settings")
 
-// 默认：所有窗口关闭 → 退出
-// 自定义：拦截关闭
+// Default: all windows closed → quit
+// Custom: intercept close
 settingsWin.SetCloseIntercept(func() {
     if hasUnsavedChanges {
         dialog.ShowConfirm("Quit?", "Unsaved changes!", func(ok bool) {
@@ -389,10 +389,10 @@ settingsWin.SetCloseIntercept(func() {
 })
 ```
 
-### 8.2 System Tray（桌面功能）
+### 8.2 System Tray (Desktop Feature)
 
 ```go
-// 如果 driver 支持 desktop 特性
+// If driver supports desktop features
 if desk, ok := a.(desktop.App); ok {
     menu := fyne.NewMenu("Tray",
         fyne.NewMenuItem("Show", func() { w.Show() }),
@@ -402,15 +402,15 @@ if desk, ok := a.(desktop.App); ok {
 }
 ```
 
-## 9. 资源管理
+## 9. Resource Management
 
-### 9.1 资源嵌入
+### 9.1 Resource Embedding
 
 ```bash
-# 命令行
+# CLI
 fyne bundle -o bundled.go image.png font.ttf
 
-# 或 go:generate
+# Or go:generate
 //go:generate fyne bundle -o bundled.go assets/*.png
 ```
 
@@ -418,7 +418,7 @@ fyne bundle -o bundled.go image.png font.ttf
 img := canvas.NewImageFromResource(resourceImagePng)
 ```
 
-### 9.2 自定义主题
+### 9.2 Custom Theme
 
 ```go
 type CustomTheme struct{}
@@ -447,16 +447,16 @@ func (t CustomTheme) Size(name fyne.ThemeSizeName) float32 {
     return theme.DefaultTheme().Size(name)
 }
 
-// 应用
+// Apply
 a.Settings().SetTheme(&CustomTheme{})
 
-// 局部主题覆写
+// Local theme override
 container.NewThemeOverride(&CustomTheme{}, content)
 ```
 
-## 10. 对话框模式
+## 10. Dialog Patterns
 
-### 10.1 确认操作
+### 10.1 Confirm Action
 
 ```go
 func deleteItem(id string, w fyne.Window) {
@@ -470,7 +470,7 @@ func deleteItem(id string, w fyne.Window) {
 }
 ```
 
-### 10.2 进度对话框
+### 10.2 Progress Dialog
 
 ```go
 func processWithProgress(w fyne.Window) {
@@ -491,74 +491,74 @@ func processWithProgress(w fyne.Window) {
 }
 ```
 
-## 11. Navigation 导航模式
+## 11. Navigation Pattern
 
-`container.NewNavigation` (v2.7+) 提供带返回按钮的页面导航栈，适合设置页、向导等多层级界面。
+`container.NewNavigation` (v2.7+) provides a page navigation stack with a back button, suitable for settings pages, wizards, and other multi-level interfaces.
 
 ```go
 func settingsPage() fyne.CanvasObject {
     general := widget.NewLabel("General Settings")
     advanced := widget.NewLabel("Advanced Settings")
 
-    // 导航：push 新页面时自动出现返回按钮
+    // Navigation: pushing a new page auto-shows back button
     nav := container.NewNavigationWithTitle(general, "Settings")
 
     general.OnTapped = func() {
-        nav.Push(advanced)  // 推入新页面，显示返回按钮
+        nav.Push(advanced)  // push new page, show back button
     }
     return nav
 }
 ```
 
-## 12. Canvas 样式模式
+## 12. Canvas Styling Patterns
 
-### 12.1 Rectangle 圆角与 aspect ratio
+### 12.1 Rectangle Corner Radius & Aspect Ratio
 
 ```go
-// 胶囊形（pill）按钮背景
+// Pill-shaped button background
 bg := canvas.NewRectangle(theme.Color(theme.ColorNamePrimary))
-bg.CornerRadius = 20  // 设为高度一半 ≈ pill
+bg.CornerRadius = 20  // set to half height ≈ pill
 
-// 仅顶部圆角
+// Top-only rounded corners
 bg.TopLeftCornerRadius = 8
 bg.TopRightCornerRadius = 8
 
-// 固定宽高比
-bg.Aspect = 1.6  // 宽度自动 = 高度 × 1.6
+// Fixed aspect ratio
+bg.Aspect = 1.6  // width auto = height × 1.6
 ```
 
-### 12.2 Image 填充模式
+### 12.2 Image Fill Modes
 
 ```go
-// 头像：Cover 裁剪填满
+// Avatar: Cover crop to fill
 avatar := canvas.NewImageFromFile("avatar.jpg")
 avatar.FillMode = canvas.ImageFillCover
 avatar.SetMinSize(fyne.NewSquareSize(48))
 
-// 缩略图：Contain 适配不裁剪
+// Thumbnail: Contain to fit without cropping
 thumb := canvas.NewImageFromFile("photo.jpg")
 thumb.FillMode = canvas.ImageFillContain
 thumb.SetMinSize(fyne.NewSize(200, 150))
 ```
 
-## 13. Label 可选文本
+## 13. Label Selectable Text
 
-v2.6+ 支持用户选中和复制 Label 文字：
+v2.6+ allows users to select and copy Label text:
 
 ```go
 label := widget.NewLabel("Selectable text")
-label.Selectable = true  // 用户可框选、Ctrl+C 复制
+label.Selectable = true  // users can select and Ctrl+C to copy
 
-// 获取选中文本
+// Get selected text
 selected := label.SelectedText()
 ```
 
-## 14. RowWrap 布局
+## 14. RowWrap Layout
 
-v2.7+ RowWrap 水平排列子元素，空间不够时自动换行，类似 CSS flex-wrap：
+v2.7+ RowWrap arranges children horizontally and auto-wraps when space is insufficient, similar to CSS flex-wrap:
 
 ```go
-// 配合 GridWrap container 使用（内部已用 RowWrap）
+// Via GridWrap container (uses RowWrap internally)
 tags := container.NewGridWrap(fyne.NewSize(80, 30),
     widget.NewButton("Go", nil),
     widget.NewButton("Rust", nil),
@@ -566,8 +566,8 @@ tags := container.NewGridWrap(fyne.NewSize(80, 30),
     widget.NewButton("TypeScript", nil),
 )
 
-// 手动使用 RowWrap layout
+// Manual RowWrap layout
 c := container.New(layout.NewRowWrapLayout(), objs...)
-// 或带自定义间距
+// Or with custom padding
 c := container.New(layout.NewRowWrapLayoutWithCustomPadding(8, 4), objs...)
 ```

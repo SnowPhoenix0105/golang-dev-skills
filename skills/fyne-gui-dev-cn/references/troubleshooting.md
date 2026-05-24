@@ -31,6 +31,7 @@
 | 无限递归/StackOverflow | 是否在 UpdateCell 中调用了 SetRowHeight？ |
 | 内存泄漏 | 是否反复 SetContent 而未清理旧 Widget？ |
 | 主题色不生效 | 是否使用了自定义 Theme 但未覆盖全部 Color/Size？ |
+| v2.6+ `fyne.Do called from main goroutine` | 事件回调中调了 `fyne.Do` |
 
 ## 1. Widget 不可见
 
@@ -501,11 +502,14 @@ dialog.ShowInformation("Title", "Msg", myWindow)
 go doc fyne.io/fyne/v2/widget
 go doc fyne.io/fyne/v2/widget.Label
 
-# 方法2：找到 GOMODCACHE 中的源码
-go list -m -json fyne.io/fyne/v2 | grep Dir
+# 方法2：找到 Fyne 模块路径
+FYNE_DIR=$(go list -m -json fyne.io/fyne/v2 | grep '"Dir"' | cut -d'"' -f4)
+echo "$FYNE_DIR/widget/"
+
+# 方法3：GOMODCACHE 回退
 ls "$(go env GOMODCACHE)/fyne.io/fyne/v2@v2.5.0"
 
-# 方法3：搜索特定符号
+# 方法4：搜索特定符号
 rg "func.*CreateRenderer" "$(go env GOMODCACHE)/fyne.io/fyne/v2@*/widget/"
 ```
 
