@@ -248,6 +248,28 @@ a := x.(T)
 
 即使断言失败在逻辑上不可能发生（如刚通过 switch-type 判断了类型），也必须使用 `a, _ := x.(T)` 形式，禁止使用单返回值 `a := x.(T)`。
 
+### 2.8 禁止使用 dot import
+
+除非用户明确要求或其它 skill 明确要求，**禁止使用 `import . "path/to/package"`**（dot import）。
+
+```go
+// 禁止：dot import
+import . "fmt"
+
+func main() {
+    Println("hello") // 分不清是 fmt.Println 还是自定义的 Println
+}
+```
+
+dot import 会将外部包的导出符号全部注入当前包的命名空间，带来以下问题：
+- **命名冲突**：外部包新增的导出符号可能与当前包的标识符冲突
+- **可读性差**：读者无法区分符号来自哪个包，代码审查和维护困难
+- **工具链问题**：某些静态分析工具和 IDE 对 dot import 的支持不佳
+
+应使用具名导入（`import "fmt"`）或别名导入（`import fmt_alias "fmt"`）。
+
+例外：用户明确要求使用 dot import，或其它 skill 明确要求使用 dot import。
+
 ---
 
 ## 3. 故障排查

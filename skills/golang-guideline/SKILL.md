@@ -248,6 +248,28 @@ a := x.(T)
 
 Even when assertion failure is logically impossible (e.g., immediately after a switch-type check), you must use the `a, _ := x.(T)` form. The single-value `a := x.(T)` form is forbidden.
 
+### 2.8 Dot Imports Are Forbidden
+
+Unless explicitly required by the user or another skill, **dot imports (`import . "path/to/package"`) are forbidden**.
+
+```go
+// Forbidden: dot import
+import . "fmt"
+
+func main() {
+    Println("hello") // unclear whether this is fmt.Println or a custom Println
+}
+```
+
+Dot imports inject all exported symbols of the external package into the current package's namespace, causing the following problems:
+- **Naming conflicts**: newly added exported symbols in the external package may clash with identifiers in the current package
+- **Poor readability**: readers cannot tell which package a symbol comes from, making code review and maintenance difficult
+- **Tooling issues**: some static analysis tools and IDEs have poor support for dot imports
+
+Use named imports (`import "fmt"`) or alias imports (`import fmt_alias "fmt"`) instead.
+
+Exception: the user or another skill explicitly requires dot imports.
+
 ---
 
 ## 3. Troubleshooting
