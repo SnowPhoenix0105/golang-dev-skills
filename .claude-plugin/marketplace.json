@@ -1,0 +1,72 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "golang-dev-skills",
+  "version": "1.0.0",
+  "description": "A collection of Go development skills for Claude Code, covering Fyne GUI development and Go coding guidelines.",
+  "owner": {
+    "name": "snowphoenix",
+    "email": ""
+  },
+  "plugins": [
+    {
+      "name": "fyne-gui-dev",
+      "description": "Fyne cross-platform GUI application development. Use when creating, modifying, debugging, or understanding Fyne GUI applications.",
+      "source": "./skills/fyne-gui-dev",
+      "category": "development",
+      "version": "1.0.0",
+      "author": {
+        "name": "snowphoenix"
+      }
+    },
+    {
+      "name": "fyne-gui-dev-cn",
+      "description": "Fyne 跨平台 GUI 应用开发。当用户需要创建、修改、调试、或理解 Fyne GUI 应用时使用此技能。",
+      "source": "./skills/fyne-gui-dev-cn",
+      "category": "development",
+      "version": "1.0.0",
+      "author": {
+        "name": "snowphoenix"
+      }
+    },
+    {
+      "name": "golang-guideline",
+      "description": "Go language development guide. Use when editing, reviewing, debugging, or understanding Go code. Covers development workflow, code style, toolchain usage, and troubleshooting.",
+      "source": "./skills/golang-guideline",
+      "category": "development",
+      "version": "1.0.0",
+      "author": {
+        "name": "snowphoenix"
+      }
+    },
+    {
+      "name": "golang-guideline-cn",
+      "description": "Go语言开发指南。当编辑、审查、调试、理解Go语言代码时使用此技能，包含开发流程、代码风格、工具链使用、故障排查等。",
+      "source": "./skills/golang-guideline-cn",
+      "category": "development",
+      "version": "1.0.0",
+      "author": {
+        "name": "snowphoenix"
+      }
+    },
+    {
+      "name": "mockey-ut",
+      "description": "mockey runtime function/variable mock library for Go unit tests. Use when you need to mock functions, methods, or variables via patching.",
+      "source": "./skills/mockey-ut",
+      "category": "development",
+      "version": "1.0.0",
+      "author": {
+        "name": "snowphoenix"
+      }
+    },
+    {
+      "name": "mockey-ut-cn",
+      "description": "mockey 运行时函数/变量 mock 库。当需要在 Go 单元测试中对函数、方法或变量进行 Patch 时使用此技能。",
+      "source": "./skills/mockey-ut-cn",
+      "category": "development",
+      "version": "1.0.0",
+      "author": {
+        "name": "snowphoenix"
+      }
+    }
+  ]
+}
