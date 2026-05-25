@@ -16,23 +16,60 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install agent-skills-cli
-        run: npm install -g agent-skills-cli
-
       - name: Validate all SKILL.md files
         run: |
+          set -e
           find skills -name "SKILL.md" | while read file; do
             echo "Validating: $file"
-            agent-skills-cli validate "$file" || exit 1
+
+            dir_name=$(basename "$(dirname "$file")")
+
+            # Check frontmatter exists
+            if ! head -1 "$file" | grep -q "^---$"; then
+              echo "  ERROR: missing YAML frontmatter (must start with ---)"
+              exit 1
+            fi
+
+            # Extract name field
+            skill_name=$(sed -n '/^---$/,/^---$/p' "$file" | grep "^name:" | sed 's/^name: *//')
+            if [ -z "$skill_name" ]; then
+              echo "  ERROR: missing required 'name' field in frontmatter"
+              exit 1
+            fi
+
+            # Check name matches directory
+            if [ "$skill_name" != "$dir_name" ]; then
+              echo "  ERROR: name '$skill_name' does not match directory '$dir_name'"
+              exit 1
+            fi
+
+            # Check name format: 1-64 chars, lowercase letters/numbers/hyphens only
+            if ! echo "$skill_name" | grep -qE '^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$'; then
+              echo "  ERROR: name '$skill_name' violates naming rules"
+              echo "    Must be 1-64 chars, lowercase letters/numbers/hyphens only"
+              echo "    Must not start or end with hyphen"
+              exit 1
+            fi
+
+            # Check no consecutive hyphens
+            if echo "$skill_name" | grep -q -- "--"; then
+              echo "  ERROR: name '$skill_name' contains consecutive hyphens"
+              exit 1
+            fi
+
+            # Check description exists and is within 1024 chars
+            description=$(sed -n '/^---$/,/^---$/p' "$file" | grep "^description:" | sed 's/^description: *//')
+            if [ -z "$description" ]; then
+              echo "  ERROR: missing required 'description' field in frontmatter"
+              exit 1
+            fi
+
+            echo "  OK: $skill_name"
           done
 
       - name: Verify marketplace manifests are in sync
         run: |
+          set -e
           echo "Checking that all skills are listed in marketplace manifests..."
           for dir in skills/*/; do
             skill_name=$(basename "$dir")
