@@ -51,6 +51,30 @@
         "authentication": "on_install"
       },
       "category": "Development"
+    },
+    {
+      "name": "mockey",
+      "source": {
+        "source": "local",
+        "path": "./skills/mockey"
+      },
+      "policy": {
+        "installation": "available",
+        "authentication": "on_install"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "mockey-cn",
+      "source": {
+        "source": "local",
+        "path": "./skills/mockey-cn"
+      },
+      "policy": {
+        "installation": "available",
+        "authentication": "on_install"
+      },
+      "category": "Development"
     }
   ]
 }

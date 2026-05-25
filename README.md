@@ -10,6 +10,8 @@ Go 语言开发相关的 Agent Skills 集合，遵循 `agentskills.io` 开放标
 | `golang-guideline-cn` | Go 语言开发指南（中文版） |
 | `fyne-gui-dev` | Fyne 跨平台 GUI 应用开发（英文版） |
 | `fyne-gui-dev-cn` | Fyne 跨平台 GUI 应用开发（中文版） |
+| `mockey` | mockey 单元测试 mock 库（英文版） |
+| `mockey-cn` | mockey 单元测试 mock 库（中文版） |
 
 ## 接入你的 Agent
 
