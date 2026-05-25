@@ -1,0 +1,56 @@
+{
+  "name": "repo-marketplace",
+  "interface": {
+    "display_name": "Go Development Skills"
+  },
+  "plugins": [
+    {
+      "name": "fyne-gui-dev",
+      "source": {
+        "source": "local",
+        "path": "./skills/fyne-gui-dev"
+      },
+      "policy": {
+        "installation": "available",
+        "authentication": "on_install"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "fyne-gui-dev-cn",
+      "source": {
+        "source": "local",
+        "path": "./skills/fyne-gui-dev-cn"
+      },
+      "policy": {
+        "installation": "available",
+        "authentication": "on_install"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "golang-guideline",
+      "source": {
+        "source": "local",
+        "path": "./skills/golang-guideline"
+      },
+      "policy": {
+        "installation": "installed_by_default",
+        "authentication": "on_install"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "golang-guideline-cn",
+      "source": {
+        "source": "local",
+        "path": "./skills/golang-guideline-cn"
+      },
+      "policy": {
+        "installation": "installed_by_default",
+        "authentication": "on_install"
+      },
+      "category": "Development"
+    }
+  ]
+}

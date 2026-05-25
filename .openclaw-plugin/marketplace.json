@@ -1,0 +1,22 @@
+{
+  "id": "golang-dev-skills",
+  "name": "Go Development Skills",
+  "description": "A collection of Go development skills for OpenClaw, covering Fyne GUI development and Go coding guidelines.",
+  "version": "1.0.0",
+  "kind": "skills",
+  "skills": [
+    "./skills/fyne-gui-dev",
+    "./skills/fyne-gui-dev-cn",
+    "./skills/golang-guideline",
+    "./skills/golang-guideline-cn"
+  ],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  },
+  "uiHints": {
+    "displayName": "Go Development Skills",
+    "category": "Development"
+  }
+}

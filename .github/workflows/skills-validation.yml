@@ -1,0 +1,48 @@
+name: Skills Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'skills/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install agent-skills-cli
+        run: npm install -g agent-skills-cli
+
+      - name: Validate all SKILL.md files
+        run: |
+          find skills -name "SKILL.md" | while read file; do
+            echo "Validating: $file"
+            agent-skills-cli validate "$file" || exit 1
+          done
+
+      - name: Verify marketplace manifests are in sync
+        run: |
+          echo "Checking that all skills are listed in marketplace manifests..."
+          for dir in skills/*/; do
+            skill_name=$(basename "$dir")
+            if ! grep -q "\"$skill_name\"" .claude-plugin/marketplace.json; then
+              echo "ERROR: $skill_name not found in .claude-plugin/marketplace.json"
+              exit 1
+            fi
+            if ! grep -q "\"$skill_name\"" .agents/plugins/marketplace.json; then
+              echo "ERROR: $skill_name not found in .agents/plugins/marketplace.json"
+              exit 1
+            fi
+            echo "OK: $skill_name"
+          done
