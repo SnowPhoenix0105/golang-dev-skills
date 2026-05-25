@@ -49,9 +49,9 @@
       }
     },
     {
-      "name": "mockey",
+      "name": "mockey-ut",
       "description": "mockey runtime function/variable mock library for Go unit tests. Use when you need to mock functions, methods, or variables via patching.",
-      "source": "./skills/mockey",
+      "source": "./skills/mockey-ut",
       "category": "development",
       "version": "1.0.0",
       "author": {
@@ -59,9 +59,9 @@
       }
     },
     {
-      "name": "mockey-cn",
+      "name": "mockey-ut-cn",
       "description": "mockey 运行时函数/变量 mock 库。当需要在 Go 单元测试中对函数、方法或变量进行 Patch 时使用此技能。",
-      "source": "./skills/mockey-cn",
+      "source": "./skills/mockey-ut-cn",
       "category": "development",
       "version": "1.0.0",
       "author": {

@@ -53,10 +53,10 @@
       "category": "Development"
     },
     {
-      "name": "mockey",
+      "name": "mockey-ut",
       "source": {
         "source": "local",
-        "path": "./skills/mockey"
+        "path": "./skills/mockey-ut"
       },
       "policy": {
         "installation": "available",
@@ -65,10 +65,10 @@
       "category": "Development"
     },
     {
-      "name": "mockey-cn",
+      "name": "mockey-ut-cn",
       "source": {
         "source": "local",
-        "path": "./skills/mockey-cn"
+        "path": "./skills/mockey-ut-cn"
       },
       "policy": {
         "installation": "available",

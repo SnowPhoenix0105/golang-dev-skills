@@ -1,5 +1,5 @@
 ---
-name: mockey-cn
+name: mockey-ut-cn
 description: |
   mockey 运行时函数/变量 mock 库。当需要在 Go 单元测试中对函数、方法或变量进行 Patch 时使用此技能。
   触发场景：提到 mock、mockey、打桩、Patch、单元测试 mock、函数替换、Mock、PatchConvey、PatchRun、MockValue 等。
