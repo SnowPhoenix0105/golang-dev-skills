@@ -1,0 +1,8 @@
+{
+  "name": "golang-dev-plugin-cn",
+  "version": "1.0.0",
+  "description": "Go 开发技能中文版：Fyne GUI、开发指南、mockey 单元测试 mock。",
+  "author": {
+    "name": "snowphoenix"
+  }
+}

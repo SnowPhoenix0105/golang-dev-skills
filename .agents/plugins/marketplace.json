@@ -1,78 +1,30 @@
 {
-  "name": "repo-marketplace",
+  "name": "golang-dev-skills",
   "interface": {
-    "display_name": "Go Development Skills"
+    "displayName": "Go Development Skills"
   },
   "plugins": [
     {
-      "name": "fyne-gui-dev",
+      "name": "golang-dev-plugin",
       "source": {
         "source": "local",
-        "path": "./skills/fyne-gui-dev"
+        "path": "./golang-dev-plugin"
       },
       "policy": {
-        "installation": "available",
-        "authentication": "on_install"
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
       },
       "category": "Development"
     },
     {
-      "name": "fyne-gui-dev-cn",
+      "name": "golang-dev-plugin-cn",
       "source": {
         "source": "local",
-        "path": "./skills/fyne-gui-dev-cn"
+        "path": "./golang-dev-plugin-cn"
       },
       "policy": {
-        "installation": "available",
-        "authentication": "on_install"
-      },
-      "category": "Development"
-    },
-    {
-      "name": "golang-guideline",
-      "source": {
-        "source": "local",
-        "path": "./skills/golang-guideline"
-      },
-      "policy": {
-        "installation": "installed_by_default",
-        "authentication": "on_install"
-      },
-      "category": "Development"
-    },
-    {
-      "name": "golang-guideline-cn",
-      "source": {
-        "source": "local",
-        "path": "./skills/golang-guideline-cn"
-      },
-      "policy": {
-        "installation": "installed_by_default",
-        "authentication": "on_install"
-      },
-      "category": "Development"
-    },
-    {
-      "name": "mockey-ut",
-      "source": {
-        "source": "local",
-        "path": "./skills/mockey-ut"
-      },
-      "policy": {
-        "installation": "available",
-        "authentication": "on_install"
-      },
-      "category": "Development"
-    },
-    {
-      "name": "mockey-ut-cn",
-      "source": {
-        "source": "local",
-        "path": "./skills/mockey-ut-cn"
-      },
-      "policy": {
-        "installation": "available",
-        "authentication": "on_install"
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
       },
       "category": "Development"
     }

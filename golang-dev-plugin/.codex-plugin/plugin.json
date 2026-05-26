@@ -1,0 +1,8 @@
+{
+  "name": "golang-dev-plugin",
+  "version": "1.0.0",
+  "description": "English Go development skills: Fyne GUI, coding guidelines, and mockey unit test mocking.",
+  "author": {
+    "name": "snowphoenix"
+  }
+}
