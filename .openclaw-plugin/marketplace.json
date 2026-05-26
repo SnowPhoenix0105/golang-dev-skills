@@ -5,12 +5,12 @@
   "version": "1.0.0",
   "kind": "skills",
   "skills": [
-    "./skills/fyne-gui-dev",
-    "./skills/fyne-gui-dev-cn",
-    "./skills/golang-guideline",
-    "./skills/golang-guideline-cn",
-    "./skills/mockey-ut",
-    "./skills/mockey-ut-cn"
+    "./golang-dev-plugin/skills/fyne-gui-dev",
+    "./golang-dev-plugin-cn/skills/fyne-gui-dev-cn",
+    "./golang-dev-plugin/skills/golang-guideline",
+    "./golang-dev-plugin-cn/skills/golang-guideline-cn",
+    "./golang-dev-plugin/skills/mockey-ut",
+    "./golang-dev-plugin-cn/skills/mockey-ut-cn"
   ],
   "configSchema": {
     "type": "object",

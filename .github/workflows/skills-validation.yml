@@ -4,11 +4,19 @@ on:
   push:
     branches: [main]
     paths:
-      - 'skills/**'
+      - 'golang-dev-plugin/**'
+      - 'golang-dev-plugin-cn/**'
+      - '.claude-plugin/marketplace.json'
+      - '.agents/plugins/marketplace.json'
+      - '.openclaw-plugin/marketplace.json'
   pull_request:
     branches: [main]
     paths:
-      - 'skills/**'
+      - 'golang-dev-plugin/**'
+      - 'golang-dev-plugin-cn/**'
+      - '.claude-plugin/marketplace.json'
+      - '.agents/plugins/marketplace.json'
+      - '.openclaw-plugin/marketplace.json'
 
 jobs:
   validate:
@@ -16,10 +24,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate all SKILL.md files
+      - name: Validate all SKILL.md files in plugins
         run: |
           set -e
-          find skills -name "SKILL.md" | while read file; do
+          find golang-dev-plugin/skills golang-dev-plugin-cn/skills -name "SKILL.md" | while read file; do
             echo "Validating: $file"
 
             dir_name=$(basename "$(dirname "$file")")
@@ -67,19 +75,67 @@ jobs:
             echo "  OK: $skill_name"
           done
 
-      - name: Verify marketplace manifests are in sync
+      - name: Verify plugin directories and manifests
         run: |
           set -e
-          echo "Checking that all skills are listed in marketplace manifests..."
-          for dir in skills/*/; do
-            skill_name=$(basename "$dir")
-            if ! grep -q "\"$skill_name\"" .claude-plugin/marketplace.json; then
-              echo "ERROR: $skill_name not found in .claude-plugin/marketplace.json"
+          echo "Checking plugin manifests..."
+
+          for plugin in golang-dev-plugin golang-dev-plugin-cn; do
+            # Verify plugin directory exists
+            if [ ! -d "$plugin" ]; then
+              echo "ERROR: plugin directory $plugin not found"
               exit 1
             fi
-            if ! grep -q "\"$skill_name\"" .agents/plugins/marketplace.json; then
-              echo "ERROR: $skill_name not found in .agents/plugins/marketplace.json"
+            echo "OK: $plugin/ exists"
+
+            # Verify .claude-plugin/plugin.json
+            if [ ! -f "$plugin/.claude-plugin/plugin.json" ]; then
+              echo "ERROR: $plugin/.claude-plugin/plugin.json missing"
               exit 1
             fi
-            echo "OK: $skill_name"
+            echo "OK: $plugin/.claude-plugin/plugin.json"
+
+            # Verify .codex-plugin/plugin.json
+            if [ ! -f "$plugin/.codex-plugin/plugin.json" ]; then
+              echo "ERROR: $plugin/.codex-plugin/plugin.json missing"
+              exit 1
+            fi
+            echo "OK: $plugin/.codex-plugin/plugin.json"
+
+            # Verify plugin name in plugin.json matches directory
+            pname=$(grep '"name"' "$plugin/.claude-plugin/plugin.json" | head -1 | sed 's/.*"name": *"\(.*\)".*/\1/')
+            if [ "$pname" != "$plugin" ]; then
+              echo "ERROR: plugin name '$pname' does not match directory '$plugin'"
+              exit 1
+            fi
+            echo "OK: plugin name matches directory"
+          done
+
+      - name: Verify marketplace entries match plugins
+        run: |
+          set -e
+          echo "Checking marketplace entries..."
+
+          for mkt in .claude-plugin/marketplace.json .agents/plugins/marketplace.json; do
+            if ! grep -q "golang-dev-plugin" "$mkt"; then
+              echo "ERROR: golang-dev-plugin not found in $mkt"
+              exit 1
+            fi
+            if ! grep -q "golang-dev-plugin-cn" "$mkt"; then
+              echo "ERROR: golang-dev-plugin-cn not found in $mkt"
+              exit 1
+            fi
+            echo "OK: $mkt lists both plugins"
+          done
+
+      - name: Verify OpenClaw marketplace lists all skills
+        run: |
+          set -e
+          echo "Checking OpenClaw marketplace..."
+          for skill in fyne-gui-dev fyne-gui-dev-cn golang-guideline golang-guideline-cn mockey-ut mockey-ut-cn; do
+            if ! grep -q "$skill" .openclaw-plugin/marketplace.json; then
+              echo "ERROR: $skill not found in .openclaw-plugin/marketplace.json"
+              exit 1
+            fi
+            echo "OK: $skill"
           done
