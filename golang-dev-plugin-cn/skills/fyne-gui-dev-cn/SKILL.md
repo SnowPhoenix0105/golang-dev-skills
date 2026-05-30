@@ -181,6 +181,18 @@ binding.SPrintf("Count: %d", intBinding)
 
 完整 API（集合绑定、列表绑定、树绑定、URI 绑定、Preference 绑定等）见 `references/api-reference.md` 数据绑定 API 部分。
 
+## i18n 翻译
+
+```go
+import "fyne.io/fyne/v2/lang"
+
+title := widget.NewLabel(lang.L("My App Title"))          // 默认值即 key
+title := widget.NewLabel(lang.X("win.title", "My Title")) // 显式 key + 默认值
+age := widget.NewLabel(lang.N("{% raw %}{{.Years}}{% endraw %} years old", n, map[string]any{"Years": n}))
+```
+
+翻译文件为 JSON，使用 `//go:embed` 嵌入后用 `lang.AddTranslationsFS` 加载。完整用法见 `references/best-practices.md` 第 15 节。
+
 ## Canvas 原始图形
 
 ```go
@@ -296,6 +308,60 @@ w.Canvas().AddShortcut(&desktop.CustomShortcut{
     KeyName: fyne.KeyS, Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }, func(shortcut fyne.Shortcut) { /* Save As */ })
 ```
+
+## 系统托盘
+
+```go
+if desk, ok := a.(desktop.App); ok {
+    desk.SetSystemTrayMenu(fyne.NewMenu("Tray",
+        fyne.NewMenuItem("Show", func() { w.Show() })))
+}
+w.SetCloseIntercept(func() { w.Hide() }) // 关闭 → 隐藏，不退出
+```
+
+完整生命周期管理（隐藏/显示、自定义图标）见 `references/best-practices.md` 第 19 节。
+
+## 编译与部署
+
+### 编译标签
+
+常用：`mobile`（桌面端模拟移动端）、`debug`（可视化布局边界）、`hints`（优化建议）、`no_emoj`（减小体积）。完整列表见 `references/deployment.md`。
+
+### 桌面打包
+
+```bash
+fyne package -os darwin -icon myapp.png    # macOS → .app
+fyne package -os linux -icon myapp.png     # Linux → .tar.gz
+fyne package -os windows -icon myapp.png   # Windows → .exe
+```
+
+### 移动端打包
+
+```bash
+fyne package -os android -app-id com.example.app -icon icon.png  # .apk
+fyne package -os ios -app-id com.example.app -icon icon.png      # .app
+adb install myapp.apk                                             # 安装 Android
+xcrun simctl install booted myapp.app                             # 安装 iOS 模拟器
+```
+
+### Web 打包
+
+```bash
+fyne serve                  # 本地测试 http://localhost:8080
+fyne package -os web        # 生成 WebAssembly 发布文件
+```
+
+### 交叉编译
+
+直接编译需目标平台 C 编译器。推荐使用 `fyne-cross`（Docker 封装）：
+
+```bash
+go install github.com/fyne-io/fyne-cross@latest
+fyne-cross linux -output myapp ./
+fyne-cross windows -arch=*
+```
+
+完整交叉编译配置、应用商店分发（macOS/iOS/Android）见 `references/deployment.md`。
 
 ## 主题与样式
 
@@ -428,6 +494,12 @@ rg "CreateRenderer" "$FYNE_DIR/widget/" | head -20
 | 数据绑定不工作 | `references/best-practices.md` | 第3节"数据绑定模式" |
 | Widget 不显示/崩溃/性能差 | `references/troubleshooting.md` | 先查快速诊断表，再查对应章节 |
 | 写自定义 Widget | `references/custom-widget.md` | 完整模板 + 5 条关键规则 |
+| 扩展已有 Widget（添加行为） | `references/best-practices.md` | 第17节"扩展已有 Widget" |
+| 实现自定义布局 | `references/best-practices.md` | 第16节"自定义布局" |
+| 添加应用翻译 (i18n) | `references/best-practices.md` | 第15节"i18n 翻译" |
+| 系统托盘/窗口生命周期 | `references/best-practices.md` | 第19节 + 第20节 |
+| Preferences 持久化设置 | `references/best-practices.md` | 第18节"Preferences 进阶" |
+| 编译标签/交叉编译/打包/分发 | `references/deployment.md` | 对应章节 |
 | 单元测试怎么写 | `references/testing.md` | 模拟交互、渲染验证示例 |
 
 上述 references 都覆盖不到时，按照上一节"无从下手？先读这些"的方法探索源码。如果探索源码后仍然无法解决，**向用户报告具体情况并寻求帮助，不得静默猜测。**

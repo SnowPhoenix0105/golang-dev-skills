@@ -183,6 +183,18 @@ binding.SPrintf("Count: %d", intBinding)
 
 Full API (collection bindings, list bindings, tree bindings, URI bindings, Preference bindings, etc.) — see `references/api-reference.md` Data Binding API section.
 
+## i18n Translations
+
+```go
+import "fyne.io/fyne/v2/lang"
+
+title := widget.NewLabel(lang.L("My App Title"))          // default value is the key
+title := widget.NewLabel(lang.X("win.title", "My Title")) // explicit key + default
+age := widget.NewLabel(lang.N("{% raw %}{{.Years}}{% endraw %} years old", n, map[string]any{"Years": n}))
+```
+
+Translation files are JSON, loaded via `//go:embed` and `lang.AddTranslationsFS`. Full usage — see `references/best-practices.md` Section 15.
+
 ## Canvas Primitives
 
 ```go
@@ -298,6 +310,60 @@ w.Canvas().AddShortcut(&desktop.CustomShortcut{
     KeyName: fyne.KeyS, Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
 }, func(shortcut fyne.Shortcut) { /* Save As */ })
 ```
+
+## System Tray
+
+```go
+if desk, ok := a.(desktop.App); ok {
+    desk.SetSystemTrayMenu(fyne.NewMenu("Tray",
+        fyne.NewMenuItem("Show", func() { w.Show() })))
+}
+w.SetCloseIntercept(func() { w.Hide() }) // close → hide, don't exit
+```
+
+Full lifecycle management (hide/show, custom icon) — see `references/best-practices.md` Section 19.
+
+## Compiling & Deployment
+
+### Build Tags
+
+Common: `mobile` (simulate mobile on desktop), `debug` (visualize layout bounds), `hints` (optimization tips), `no_emoji` (reduce binary size). Full list — see `references/deployment.md`.
+
+### Desktop Packaging
+
+```bash
+fyne package -os darwin -icon myapp.png    # macOS → .app
+fyne package -os linux -icon myapp.png     # Linux → .tar.gz
+fyne package -os windows -icon myapp.png   # Windows → .exe
+```
+
+### Mobile Packaging
+
+```bash
+fyne package -os android -app-id com.example.app -icon icon.png  # .apk
+fyne package -os ios -app-id com.example.app -icon icon.png      # .app
+adb install myapp.apk                                             # install Android
+xcrun simctl install booted myapp.app                             # install iOS simulator
+```
+
+### Web Packaging
+
+```bash
+fyne serve                  # local test at http://localhost:8080
+fyne package -os web        # generate WebAssembly release files
+```
+
+### Cross Compilation
+
+Direct compilation requires target-platform C compilers. Using `fyne-cross` (Docker-based) is recommended:
+
+```bash
+go install github.com/fyne-io/fyne-cross@latest
+fyne-cross linux -output myapp ./
+fyne-cross windows -arch=*
+```
+
+Full cross-compilation setup, app store distribution (macOS/iOS/Android) — see `references/deployment.md`.
 
 ## Theme & Styling
 
@@ -430,6 +496,12 @@ Understanding these conventions lets you infer undocumented APIs from built-in W
 | Data binding not working | `references/best-practices.md` | Section 3 "Data Binding Patterns" |
 | Widget not showing / crash / perf | `references/troubleshooting.md` | Start with quick diagnosis table, then sections |
 | Writing custom Widgets | `references/custom-widget.md` | Full template + 5 key rules |
+| Extending existing Widgets (adding behavior) | `references/best-practices.md` | Section 17 "Extending Existing Widgets" |
+| Implementing custom layouts | `references/best-practices.md` | Section 16 "Custom Layouts" |
+| Adding app translations (i18n) | `references/best-practices.md` | Section 15 "i18n Translations" |
+| System tray / window lifecycle | `references/best-practices.md` | Sections 19 + 20 |
+| Preferences persistence | `references/best-practices.md` | Section 18 "Advanced Preferences" |
+| Build tags / cross-compiling / packaging | `references/deployment.md` | Relevant sections |
 | How to write unit tests | `references/testing.md` | Interaction simulation, rendering verification |
 
 If the references above don't cover your case, follow the "Stuck? Read These First" section to explore the source. If exploring the source still doesn't resolve the issue, **report the specifics to the user and ask for help — do not silently guess.**

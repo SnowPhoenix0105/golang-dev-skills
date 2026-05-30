@@ -539,7 +539,7 @@ canvas.FocusPrevious()
 canvas.Unfocus()
 canvas.Focused() Focusable
 canvas.Size() Size
-canvas.Scale() float32
+canvas.Scale() float32                       // current display scale factor (120DPI baseline)
 canvas.Overlays() OverlayStack
 canvas.OnTypedRune() func(rune)
 canvas.SetOnTypedRune(func(rune))
@@ -547,8 +547,8 @@ canvas.OnTypedKey() func(*KeyEvent)
 canvas.SetOnTypedKey(func(*KeyEvent))
 canvas.AddShortcut(shortcut, handler)
 canvas.RemoveShortcut(shortcut)
-canvas.Capture() image.Image
-canvas.PixelCoordinateForPosition(Position) (int, int)
+canvas.Capture() image.Image                 // capture Canvas as image
+canvas.PixelCoordinateForPosition(Position) (int, int) // physical pixel conversion
 canvas.InteractiveArea() (Position, Size)   // v1.4+
 ```
 
@@ -687,6 +687,13 @@ fyne.NewStaticResource(name, content []byte)
 fyne.LoadResourceFromPath(path)
 fyne.LoadResourceFromURLString(url)
 fyne.CacheResourceFromURLString(url) // v2.8+ auto-cache
+
+// Theme-adapted resources (icon variants for different theme colors)
+theme.NewThemedResource(res)           // foreground color
+theme.NewDisabledThemedResource(res)   // disabled color
+theme.NewErrorThemedResource(res)      // error color
+theme.NewInvertedThemedResource(res)   // inverted (light foreground)
+theme.NewPrimaryThemedResource(res)    // primary color
 
 // Embedding resources
 //go:generate fyne bundle -o bundled.go icon.png
