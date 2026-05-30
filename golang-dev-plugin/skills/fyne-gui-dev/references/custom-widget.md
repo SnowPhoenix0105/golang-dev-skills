@@ -9,6 +9,7 @@
 - [Supporting Data Binding](#supporting-data-binding)
 - [Debugging Custom Widgets](#debugging-custom-widgets)
 - [Common Mistakes](#common-mistakes)
+- [Content Padding Guidelines](#content-padding-guidelines)
 
 ---
 
@@ -302,3 +303,34 @@ func NewBoundWidget(data binding.String) *BoundWidget {
 | `MinSize` hardcoded | Adaptive layout broken | Compute from children |
 | `Refresh` in `Layout` | Infinite recursion | Remove Refresh call |
 | Multiple Widgets share Renderer | State chaos | Each Widget has its own Renderer |
+
+## Content Padding Guidelines
+
+Align your custom Widget visually with built-in components by following Fyne's padding standards:
+
+```go
+func (r *myRenderer) MinSize() fyne.Size {
+    th := r.w.Theme()
+    pad := th.Size(theme.SizeNamePadding)          // standard spacing 4
+    innerPad := th.Size(theme.SizeNameInnerPadding) // content inset 8
+
+    // content area = text size + innerPad on both sides
+    textSize := fyne.MeasureText("Sample", th.Size(theme.SizeNameText), fyne.TextStyle{})
+    return fyne.NewSize(textSize.Width+innerPad*2, textSize.Height+innerPad*2)
+}
+
+func (r *myRenderer) Layout(size fyne.Size) {
+    th := r.w.Theme()
+    innerPad := th.Size(theme.SizeNameInnerPadding)
+
+    // Position text at left edge + innerPad, aligning with Label/Entry
+    r.text.Move(fyne.NewPos(innerPad, innerPad))
+    r.text.Resize(fyne.NewSize(size.Width-innerPad*2, size.Height-innerPad*2))
+}
+```
+
+**Key values**:
+- `theme.SizeNamePadding` (default 4) — spacing between elements in containers
+- `theme.SizeNameInnerPadding` (default 8) — content inset within a control
+
+Built-in components (Label, Entry, Button, etc.) consistently use these values. Custom Widgets that follow the same standard ensure visual consistency.

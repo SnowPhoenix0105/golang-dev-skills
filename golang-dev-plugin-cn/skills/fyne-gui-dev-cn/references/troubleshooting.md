@@ -13,7 +13,8 @@
 - [8. 构建和打包问题](#8-构建和打包问题)
 - [9. 调试工具](#9-调试工具)
 - [10. 常见误用模式](#10-常见误用模式)
-- [11. 获取帮助](#11-获取帮助)
+- [11. 编译与安装问题](#11-编译与安装问题)
+- [12. 获取帮助](#12-获取帮助)
 
 ---
 
@@ -488,7 +489,85 @@ dialog.ShowInformation("Title", "Msg", nil)
 dialog.ShowInformation("Title", "Msg", myWindow)
 ```
 
-## 11. 获取帮助
+## 11. 编译与安装问题
+
+### 11.1 `command not found: fyne`
+
+`go install fyne.io/tools/cmd/fyne@latest` 后出现此错误，通常是 GOPATH/bin 不在 PATH 中：
+
+```bash
+# 检查 GOPATH/bin 是否在 PATH 中
+echo $PATH | grep "$(go env GOPATH)/bin"
+
+# 如缺失，添加到 ~/.zshrc 或 ~/.bashrc
+export PATH="$(go env GOPATH)/bin:$PATH"
+```
+
+### 11.2 交叉编译时 `build constraints exclude all Go files`
+
+跨平台编译时 Go 默认关闭 CGo。设置 `CGO_ENABLED=1` 解决：
+
+```bash
+CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build
+```
+
+详见 `references/deployment.md` 交叉编译章节。
+
+### 11.3 Windows 编译 `64-bit mode not compiled in`
+
+Windows 编译提示 64 位模式不可用，通常是安装了错误的编译器。使用 MSYS2 时，确保使用 "MSYS2 MinGW 64-bit" 启动菜单项打开终端。
+
+### 11.4 macOS 提示应用已损坏
+
+下载的 `.app` 被 macOS 隔离标记拦截（尤其 M1/M2 机型无法通过"系统设置"放行）。运行以下命令移除隔离标记：
+
+```bash
+sudo xattr -r -d com.apple.quarantine MyApp.app
+```
+
+如果应用已签名（Apple Developer 证书），此问题不会出现。
+
+### 11.5 图片在应用中显示过小
+
+Fyne 使用设备无关坐标系（基线 120DPI），像素图片的物理大小取决于屏幕密度。默认加载的图片 `MinSize` 为 0，会被布局压缩。解决方案：
+
+```go
+img := canvas.NewImageFromFile("photo.jpg")
+img.SetMinSize(fyne.NewSize(200, 150))  // 设置设备无关的最小尺寸
+img.FillMode = canvas.ImageFillContain  // 控制填充模式
+```
+
+### 11.6 如何手动控制元素位置
+
+如果需要完全控制元素的位置和大小，使用 `container.NewWithoutLayout()`：
+
+```go
+obj1 := canvas.NewRectangle(color.NRGBA{R: 255, A: 255})
+obj1.Resize(fyne.NewSize(100, 50))
+obj1.Move(fyne.NewPos(10, 10))
+
+obj2 := widget.NewButton("Click", nil)
+obj2.Resize(fyne.NewSize(120, 40))
+obj2.Move(fyne.NewPos(20, 80))
+
+c := container.NewWithoutLayout(obj1, obj2)
+w.SetContent(c)
+```
+
+**注意**：手动定位的容器不会随窗口大小自适应，也不提供最小尺寸。正式应用中推荐使用自定义 Layout（见 `references/best-practices.md` 第 16 节）。
+
+### 11.7 FYNE_SCALE 环境变量
+
+设置应用缩放比例，覆盖系统默认值：
+
+```bash
+FYNE_SCALE=1.5 ./myapp    # 放大 50%
+FYNE_SCALE=0.8 ./myapp    # 缩小 20%
+```
+
+Fyne 自动根据系统 DPI 缩放。移动窗口到不同显示器时会自动调整。默认缩放值可通过 `app.Settings().Scale()` 查询。
+
+## 12. 获取帮助
 
 - 官方文档：https://docs.fyne.io
 - API 文档：https://pkg.go.dev/fyne.io/fyne/v2

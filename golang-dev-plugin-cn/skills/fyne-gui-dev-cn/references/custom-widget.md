@@ -9,6 +9,7 @@
 - [支持数据绑定](#支持数据绑定)
 - [调试自定义 Widget](#调试自定义-widget)
 - [常见错误](#常见错误)
+- [内容内边距规范](#内容内边距规范)
 
 ---
 
@@ -302,3 +303,34 @@ func NewBoundWidget(data binding.String) *BoundWidget {
 | `MinSize` 硬编码 | 自适应布局被破坏 | 基于子对象计算 |
 | `Layout` 中 `Refresh` | 无限递归 | 移除 Refresh 调用 |
 | 多个 Widget 共享 Renderer | 状态混乱 | 每个 Widget 独立 Renderer |
+
+## 内容内边距规范
+
+为了让自定义 Widget 与内置组件视觉对齐，遵循 Fyne 的内边距标准：
+
+```go
+func (r *myRenderer) MinSize() fyne.Size {
+    th := r.w.Theme()
+    pad := th.Size(theme.SizeNamePadding)       // 标准间距 4
+    innerPad := th.Size(theme.SizeNameInnerPadding) // 内容内边距 8
+
+    // 内容区域 = 文字大小 + 两侧 innerPad
+    textSize := fyne.MeasureText("Sample", th.Size(theme.SizeNameText), fyne.TextStyle{})
+    return fyne.NewSize(textSize.Width+innerPad*2, textSize.Height+innerPad*2)
+}
+
+func (r *myRenderer) Layout(size fyne.Size) {
+    th := r.w.Theme()
+    innerPad := th.Size(theme.SizeNameInnerPadding)
+
+    // 将文字定位在左边界 + innerPad 处，与 Label/Entry 对齐
+    r.text.Move(fyne.NewPos(innerPad, innerPad))
+    r.text.Resize(fyne.NewSize(size.Width-innerPad*2, size.Height-innerPad*2))
+}
+```
+
+**关键数值**：
+- `theme.SizeNamePadding`（默认 4）— 用于容器间元素间距
+- `theme.SizeNameInnerPadding`（默认 8）— 用于控件内部内容的内边距
+
+内置组件（Label、Entry、Button 等）统一使用这两个值，自定义 Widget 采用相同规范可保证视觉一致性。

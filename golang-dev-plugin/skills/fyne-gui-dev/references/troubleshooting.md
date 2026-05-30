@@ -13,7 +13,8 @@
 - [8. Build & Packaging Issues](#8-build--packaging-issues)
 - [9. Debugging Tools](#9-debugging-tools)
 - [10. Common Misuse Patterns](#10-common-misuse-patterns)
-- [11. Getting Help](#11-getting-help)
+- [11. Compilation & Installation Issues](#11-compilation--installation-issues)
+- [12. Getting Help](#12-getting-help)
 
 ---
 
@@ -488,7 +489,85 @@ dialog.ShowInformation("Title", "Msg", nil)
 dialog.ShowInformation("Title", "Msg", myWindow)
 ```
 
-## 11. Getting Help
+## 11. Compilation & Installation Issues
+
+### 11.1 `command not found: fyne`
+
+After `go install fyne.io/tools/cmd/fyne@latest`, GOPATH/bin may not be in your PATH:
+
+```bash
+# Check if GOPATH/bin is in PATH
+echo $PATH | grep "$(go env GOPATH)/bin"
+
+# If missing, add to ~/.zshrc or ~/.bashrc
+export PATH="$(go env GOPATH)/bin:$PATH"
+```
+
+### 11.2 Cross-compilation `build constraints exclude all Go files`
+
+Go turns off CGo during cross-compilation. Set `CGO_ENABLED=1`:
+
+```bash
+CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build
+```
+
+See `references/deployment.md` cross-compilation section for details.
+
+### 11.3 Windows compilation `64-bit mode not compiled in`
+
+Usually caused by the wrong compiler. When using MSYS2, ensure you launch the "MSYS2 MinGW 64-bit" terminal from the Start menu.
+
+### 11.4 macOS says app is damaged
+
+When a downloaded `.app` is blocked by macOS quarantine (especially on M1/M2 where System Settings can't override):
+
+```bash
+sudo xattr -r -d com.apple.quarantine MyApp.app
+```
+
+This is not needed if the app is signed with an Apple Developer certificate.
+
+### 11.5 Images appear too small
+
+Fyne uses device-independent coordinates (120DPI baseline). Pixel-based images have a `MinSize` of 0 by default and get squeezed by layouts:
+
+```go
+img := canvas.NewImageFromFile("photo.jpg")
+img.SetMinSize(fyne.NewSize(200, 150))  // set device-independent minimum size
+img.FillMode = canvas.ImageFillContain  // control fill behavior
+```
+
+### 11.6 How to manually control element position
+
+For complete manual control, use `container.NewWithoutLayout()`:
+
+```go
+obj1 := canvas.NewRectangle(color.NRGBA{R: 255, A: 255})
+obj1.Resize(fyne.NewSize(100, 50))
+obj1.Move(fyne.NewPos(10, 10))
+
+obj2 := widget.NewButton("Click", nil)
+obj2.Resize(fyne.NewSize(120, 40))
+obj2.Move(fyne.NewPos(20, 80))
+
+c := container.NewWithoutLayout(obj1, obj2)
+w.SetContent(c)
+```
+
+**Note**: Manually positioned containers don't adapt to window resizing and have no explicit minimum size. For production, consider a custom Layout (see `references/best-practices.md` Section 16).
+
+### 11.7 FYNE_SCALE environment variable
+
+Override the system default scaling:
+
+```bash
+FYNE_SCALE=1.5 ./myapp    # 50% larger
+FYNE_SCALE=0.8 ./myapp    # 20% smaller
+```
+
+Fyne auto-scales based on system DPI. Moving a window between monitors triggers re-scaling. Query the current scale via `app.Settings().Scale()`.
+
+## 12. Getting Help
 
 - Official docs: https://docs.fyne.io
 - API docs: https://pkg.go.dev/fyne.io/fyne/v2

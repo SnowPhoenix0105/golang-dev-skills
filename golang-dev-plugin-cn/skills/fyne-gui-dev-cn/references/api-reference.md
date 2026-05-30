@@ -539,7 +539,7 @@ canvas.FocusPrevious()
 canvas.Unfocus()
 canvas.Focused() Focusable
 canvas.Size() Size
-canvas.Scale() float32
+canvas.Scale() float32                       // 当前显示器的缩放因子（120DPI 基准）
 canvas.Overlays() OverlayStack
 canvas.OnTypedRune() func(rune)
 canvas.SetOnTypedRune(func(rune))
@@ -547,8 +547,8 @@ canvas.OnTypedKey() func(*KeyEvent)
 canvas.SetOnTypedKey(func(*KeyEvent))
 canvas.AddShortcut(shortcut, handler)
 canvas.RemoveShortcut(shortcut)
-canvas.Capture() image.Image
-canvas.PixelCoordinateForPosition(Position) (int, int)
+canvas.Capture() image.Image                 // 截取 Canvas 为 image
+canvas.PixelCoordinateForPosition(Position) (int, int) // 物理像素转换
 canvas.InteractiveArea() (Position, Size)   // v1.4+
 ```
 
@@ -687,6 +687,13 @@ fyne.NewStaticResource(name, content []byte)
 fyne.LoadResourceFromPath(path)
 fyne.LoadResourceFromURLString(url)
 fyne.CacheResourceFromURLString(url) // v2.8+ 自动缓存
+
+// 主题适配资源（图标在不同主题色下的变体）
+theme.NewThemedResource(res)           // 前景色
+theme.NewDisabledThemedResource(res)   // 禁用色
+theme.NewErrorThemedResource(res)      // 错误色
+theme.NewInvertedThemedResource(res)   // 反转色（浅色前景）
+theme.NewPrimaryThemedResource(res)    // 主色
 
 // 嵌入资源
 //go:generate fyne bundle -o bundled.go icon.png
