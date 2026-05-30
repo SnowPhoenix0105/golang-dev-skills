@@ -143,11 +143,11 @@ type User struct {
 
 `gorm.Model` provides: `ID`(uint, primarykey), `CreatedAt`(time.Time), `UpdatedAt`(time.Time), `DeletedAt`(gorm.DeletedAt, index).
 
-Common tags: see `references/model-crud.md`.
+Model definition, field tags, and table naming conventions: `references/model-crud.md`.
 
 ### Naming Strategy
 
-Default `NamingStrategy` converts `CamelCase` to `snake_case`, and pluralizes table names.
+Default `NamingStrategy` converts `CamelCase` to `snake_case`, and pluralizes table names. Full config options: `references/model-crud.md`.
 
 ```go
 gorm.Open(sqlite.Open("test.db"), &gorm.Config{
@@ -188,11 +188,14 @@ db.Preload("Orders", "state = ?", "paid").Find(&users)   // with conditions
 db.Joins("Company").Find(&users)                          // JOIN (single association)
 ```
 
+Full details: `references/associations.md`.
+
 ### Transactions
 
 ```go
 db.Transaction(func(tx *gorm.DB) error {
-    if err := tx.Create(&user).Error; err != nil {
+    err := tx.Create(&user).Error
+    if err != nil {
         return err // return error → auto rollback
     }
     return nil // return nil → auto commit

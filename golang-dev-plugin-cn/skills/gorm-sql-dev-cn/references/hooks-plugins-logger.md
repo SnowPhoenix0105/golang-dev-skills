@@ -232,7 +232,8 @@ if result.Error != nil {
 }
 
 // 或
-if err := db.First(&user).Error; err != nil {
+err = db.First(&user).Error
+if err != nil {
     // 处理错误
 }
 ```

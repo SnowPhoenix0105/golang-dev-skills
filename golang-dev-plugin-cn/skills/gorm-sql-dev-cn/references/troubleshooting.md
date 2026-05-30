@@ -325,8 +325,9 @@ db.WithContext(ctx).Find(&users)
 | `ErrPrimaryKeyRequired` | 需要主键 | `FindInBatches` 需要主键字段 |
 | `ErrDuplicatedKey` | 重复键 | 违反唯一约束（需 `TranslateError: true`） |
 | `ErrForeignKeyViolated` | 外键约束 | 违反外键约束（需 `TranslateError: true`） |
+| `ErrCheckConstraintViolated` | 检查约束 | 违反 CHECK 约束（需 `TranslateError: true`） |
 | `ErrInvalidValue` | 无效值 | `dest` 不是指针或非 struct/slice |
-| `ErrEmptySlice` | 空切片 | `Create` 传入非空切片指针 |
+| `ErrEmptySlice` | 空切片 | `Create` 传入了空切片 |
 | `ErrDryRunModeUnsupported` | DryRun 不支持 | `Row`/`Rows` 在 DryRun 模式下调用 |
 | `ErrUnsupportedDriver` | 驱动不支持 | `SavePoint`/`RollbackTo` 驱动未实现 |
 | `ErrUnsupportedRelation` | 不支持的关联 | `Association("xxx")` 中关联名不存在 |

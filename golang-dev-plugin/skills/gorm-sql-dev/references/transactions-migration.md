@@ -24,10 +24,12 @@ Recommended approach — auto handles Commit/Rollback:
 
 ```go
 err := db.Transaction(func(tx *gorm.DB) error {
-    if err := tx.Create(&user).Error; err != nil {
+    err := tx.Create(&user).Error
+    if err != nil {
         return err // any returned error triggers Rollback
     }
-    if err := tx.Create(&order).Error; err != nil {
+    err = tx.Create(&order).Error
+    if err != nil {
         return err
     }
     // return nil → auto Commit
@@ -45,7 +47,8 @@ if tx.Error != nil {
     return tx.Error
 }
 
-if err := tx.Create(&user).Error; err != nil {
+err := tx.Create(&user).Error
+if err != nil {
     tx.Rollback()
     return err
 }

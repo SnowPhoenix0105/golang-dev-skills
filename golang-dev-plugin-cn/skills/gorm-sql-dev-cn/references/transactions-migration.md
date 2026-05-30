@@ -26,11 +26,13 @@
 err := db.Transaction(func(tx *gorm.DB) error {
     // 所有使用 tx 的操作都在事务中
 
-    if err := tx.Create(&user).Error; err != nil {
+    err := tx.Create(&user).Error
+    if err != nil {
         return err // 返回任何 error 都会触发 Rollback
     }
 
-    if err := tx.Create(&order).Error; err != nil {
+    err = tx.Create(&order).Error
+    if err != nil {
         return err
     }
 
@@ -54,12 +56,14 @@ if tx.Error != nil {
     return tx.Error
 }
 
-if err := tx.Create(&user).Error; err != nil {
+err := tx.Create(&user).Error
+if err != nil {
     tx.Rollback()
     return err
 }
 
-if err := tx.Create(&order).Error; err != nil {
+err = tx.Create(&order).Error
+if err != nil {
     tx.Rollback()
     return err
 }
@@ -132,7 +136,7 @@ tx.Commit()            // user 被提交
 
 ```go
 db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{
-    SkipDefaultTransaction:    false, // 默认 true 表示单条 Create/Update/Delete 自动包在事务中
+    SkipDefaultTransaction:    false, // false（默认）表示单条 Create/Update/Delete 自动包装在事务中；设为 true 则禁用此行为
     DefaultTransactionTimeout: 10 * time.Second, // 事务默认超时
 })
 ```

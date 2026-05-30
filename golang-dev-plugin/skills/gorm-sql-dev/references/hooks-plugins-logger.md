@@ -210,7 +210,8 @@ if result.Error != nil {
 }
 
 // or
-if err := db.First(&user).Error; err != nil {
+err = db.First(&user).Error
+if err != nil {
     // handle error
 }
 ```

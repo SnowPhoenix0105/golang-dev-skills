@@ -44,6 +44,7 @@ func main() {
         FieldSignable:     true,            // 检测 unsigned 类型
         FieldWithIndexTag: true,            // 生成 index tag
         FieldWithTypeTag:  true,            // 生成 type tag
+        FieldWithDefaultTag: true,          // 生成 default tag
         Mode: gen.WithDefaultQuery | gen.WithQueryInterface | gen.WithoutContext,
         // WithoutContext: 生成的代码不强制传 context
         // WithQueryInterface: 生成导出的查询接口
@@ -269,7 +270,8 @@ info, err := u.Where(u.ID.Eq(1)).UpdateSimple(
 ```go
 q := query.Use(db)
 q.Transaction(func(tx *query.Query) error {
-    if err := tx.User.Create(&user1); err != nil {
+    err := tx.User.Create(&user1)
+    if err != nil {
         return err
     }
     return tx.User.Create(&user2)

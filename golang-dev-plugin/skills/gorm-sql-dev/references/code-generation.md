@@ -42,6 +42,7 @@ func main() {
         FieldSignable:     true,
         FieldWithIndexTag: true,
         FieldWithTypeTag:  true,
+        FieldWithDefaultTag: true,
         Mode: gen.WithDefaultQuery | gen.WithQueryInterface | gen.WithoutContext,
     })
 
@@ -215,7 +216,8 @@ info, err := u.Where(u.ID.Eq(1)).UpdateSimple(
 ```go
 q := query.Use(db)
 q.Transaction(func(tx *query.Query) error {
-    if err := tx.User.Create(&user1); err != nil {
+    err := tx.User.Create(&user1)
+    if err != nil {
         return err
     }
     return tx.User.Create(&user2)

@@ -299,6 +299,7 @@ db.WithContext(ctx).Find(&users)
 | `ErrPrimaryKeyRequired` | PK required | `FindInBatches` needs a primary key field |
 | `ErrDuplicatedKey` | Duplicate key | Unique constraint violation (needs `TranslateError: true`) |
 | `ErrForeignKeyViolated` | FK violation | Foreign key constraint violation (needs `TranslateError: true`) |
+| `ErrCheckConstraintViolated` | Check constraint violation | CHECK constraint violation (needs `TranslateError: true`) |
 | `ErrInvalidValue` | Invalid value | `dest` is not a pointer or not struct/slice |
 | `ErrEmptySlice` | Empty slice | `Create` with empty slice |
 | `ErrDryRunModeUnsupported` | DryRun unsupported | `Row`/`Rows` called in DryRun mode |

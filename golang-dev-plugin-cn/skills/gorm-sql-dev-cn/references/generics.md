@@ -11,6 +11,7 @@
 - [Set 赋值](#set-赋值)
 - [Joins 构建器](#joins-构建器)
 - [Preload 构建器](#preload-构建器)
+- [链式后可用的终结方法](#链式后可用的终结方法)
 - [泛型接口对照表](#泛型接口对照表)
 
 ## 入口函数
@@ -200,24 +201,9 @@ gorm.G[T](db)
 - `Select`/`Omit` 在链式中为 `ChainInterface`（不可 `Create`）
 - 所有链式方法接收 `func(db *Statement)` 作为 Scopes 参数（与传统的 `func(*DB)*DB` 不同）
 
-### `gorm.WithResult`
-
-获取执行结果中的 `RowsAffected`：
-
-```go
-// 无泛型
-result := db.Create(&user)
-fmt.Println(result.RowsAffected)
-
-// 泛型中使用 WithResult
-var rowsAffected int64
-err := gorm.G[User](db).Clauses(
-    gorm.WithResult().ModifyStatement, // 不生效（无 statement 引用）
-).Create(ctx, &user)
-
-// 替代方案：仍用原始 DB
-result := db.Create(&user)
-fmt.Println(result.RowsAffected)
-```
-
-> 泛型 API 的终结方法返回具体类型和 `error`，而不像传统 API 返回 `*gorm.DB`。如果需要 `RowsAffected`，可以使用传统 API 或通过 `db.RowsAffected` 获取。
+> 泛型 API 的终结方法返回具体类型和 `error`，而不像传统 API 返回 `*gorm.DB`。如果需要 `RowsAffected`，可以使用传统 API 获取：
+>
+> ```go
+> result := db.Create(&user)
+> fmt.Println(result.RowsAffected)
+> ```

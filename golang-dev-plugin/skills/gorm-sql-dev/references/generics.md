@@ -11,6 +11,7 @@
 - [Set Assignments](#set-assignments)
 - [Joins Builder](#joins-builder)
 - [Preload Builder](#preload-builder)
+- [Finisher Methods After Chaining](#finisher-methods-after-chaining)
 - [Generic Interface Map](#generic-interface-map)
 
 ## Entry Point

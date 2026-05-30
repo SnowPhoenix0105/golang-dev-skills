@@ -142,11 +142,11 @@ type User struct {
 
 `gorm.Model` 提供：`ID`(uint, primarykey)、`CreatedAt`(time.Time)、`UpdatedAt`(time.Time)、`DeletedAt`(gorm.DeletedAt, index)。
 
-常用 tag 见 `references/model-crud.md`。
+模型定义、字段 Tag、表名约定详见 `references/model-crud.md`。
 
 ### 命名策略
 
-默认 `NamingStrategy` 将 Go struct 的 `CamelCase` 转为 `snake_case`，表名自动复数化。
+默认 `NamingStrategy` 将 Go struct 的 `CamelCase` 转为 `snake_case`，表名自动复数化。完整配置选项见 `references/model-crud.md`。
 
 ```go
 gorm.Open(sqlite.Open("test.db"), &gorm.Config{
@@ -187,11 +187,14 @@ db.Preload("Orders", "state = ?", "paid").Find(&users)   // 带条件
 db.Joins("Company").Find(&users)                          // JOIN（单条关联）
 ```
 
+完整说明见 `references/associations.md`。
+
 ### 事务
 
 ```go
 db.Transaction(func(tx *gorm.DB) error {
-    if err := tx.Create(&user).Error; err != nil {
+    err := tx.Create(&user).Error
+    if err != nil {
         return err // 返回 error 自动回滚
     }
     return nil // 返回 nil 自动提交
