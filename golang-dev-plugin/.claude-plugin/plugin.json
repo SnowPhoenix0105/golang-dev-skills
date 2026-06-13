@@ -1,5 +1,5 @@
 {
   "name": "golang-dev-plugin",
   "version": "1.0.0",
-  "description": "English Go development skills: Fyne GUI, coding guidelines, and mockey unit test mocking."
+  "description": "English Go development skills: Fyne GUI, coding guidelines, mockey unit test mocking, GORM database, and Bubble Tea TUI development."
 }

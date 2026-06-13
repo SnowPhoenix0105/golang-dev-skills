@@ -6,6 +6,7 @@
   "plugins": [
     {
       "name": "golang-dev-plugin",
+      "description": "English Go development skills: Fyne GUI, coding guidelines, mockey unit test mocking, GORM database, and Bubble Tea TUI development.",
       "source": {
         "source": "local",
         "path": "./golang-dev-plugin"
@@ -18,6 +19,7 @@
     },
     {
       "name": "golang-dev-plugin-cn",
+      "description": "Go 开发技能中文版：Fyne GUI、开发指南、mockey 单元测试 mock、GORM 数据库开发、Bubble Tea TUI 开发。",
       "source": {
         "source": "local",
         "path": "./golang-dev-plugin-cn"
