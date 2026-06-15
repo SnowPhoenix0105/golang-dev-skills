@@ -1,6 +1,6 @@
 ---
 name: mockey-ut
-description: mockey runtime function/variable mock library. Use this skill when you need to mock functions, methods, or variables in Go unit tests via patching. Trigger scenarios: mentions of mock, mockey, patching, unit test mock, function replacement, Mock, PatchConvey, PatchRun, MockValue, etc.
+description: mockey runtime function/variable mock library. Use this skill when you need to mock functions, methods, or variables in Go unit tests via patching. Covers mock, mockey, patching, unit test mock, function replacement, Mock, PatchConvey, PatchRun, MockValue, and more.
 ---
 
 # mockey Unit Test Mock Guide

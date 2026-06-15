@@ -1,6 +1,6 @@
 ---
 name: bubbletea-tui-dev
-description: Bubble Tea terminal UI (TUI) application development. A Go TUI framework based on The Elm Architecture. Trigger scenarios: mentions of bubbletea, bubble tea, TUI, terminal interface, command-line interface, tea.Model, tea.Cmd, tea.NewProgram, tea.KeyPressMsg, Bubbles components (spinner/textinput/textarea/table/list/viewport), Lip Gloss styling, Elm Architecture, terminal rendering, etc. Even if the user doesn't explicitly say "bubbletea", this skill should be considered for Go terminal UI development.
+description: Bubble Tea terminal UI (TUI) application development. A Go TUI framework based on The Elm Architecture. Covers bubbletea, bubble tea, TUI, terminal interface, command-line interface, tea.Model, tea.Cmd, tea.NewProgram, tea.KeyPressMsg, Bubbles components (spinner/textinput/textarea/table/list/viewport), Lip Gloss styling, Elm Architecture, terminal rendering, and more. Even if the user does not explicitly say "bubbletea", consider this skill for Go terminal UI development.
 ---
 
 # Bubble Tea TUI Application Development
