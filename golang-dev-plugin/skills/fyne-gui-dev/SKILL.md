@@ -1,6 +1,6 @@
 ---
 name: fyne-gui-dev
-description: Fyne cross-platform GUI application development. Use this skill when creating, modifying, debugging, or understanding Fyne GUI applications. Trigger scenarios: mentions of fyne, GUI desktop apps, cross-platform interfaces, custom Widget, fyne layouts, data binding, widget.New*/container.New*/app.New* and other Fyne APIs, Go GUI development. Even if the user doesn't explicitly say "fyne", consider this skill for any Go GUI development.
+description: Fyne cross-platform GUI application development. Use this skill when creating, modifying, debugging, or understanding Fyne GUI applications. Covers fyne, GUI desktop apps, cross-platform interfaces, custom Widget, fyne layouts, data binding, widget.New*/container.New*/app.New* and other Fyne APIs, Go GUI development. Even if the user does not explicitly say "fyne", consider this skill for any Go GUI development.
 ---
 
 # Fyne GUI Application Development
