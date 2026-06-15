@@ -1,12 +1,6 @@
 ---
 name: fyne-gui-dev
-description: |
-  Fyne cross-platform GUI application development. Use this skill when creating, modifying, debugging,
-  or understanding Fyne GUI applications.
-  Trigger scenarios: mentions of fyne, GUI desktop apps, cross-platform interfaces, custom Widget,
-  fyne layouts, data binding, widget.New*/container.New*/app.New* and other Fyne APIs,
-  Go GUI development. Even if the user doesn't explicitly say "fyne", consider this skill
-  for any Go GUI development.
+description: Fyne cross-platform GUI application development. Use this skill when creating, modifying, debugging, or understanding Fyne GUI applications. Trigger scenarios: mentions of fyne, GUI desktop apps, cross-platform interfaces, custom Widget, fyne layouts, data binding, widget.New*/container.New*/app.New* and other Fyne APIs, Go GUI development. Even if the user doesn't explicitly say "fyne", consider this skill for any Go GUI development.
 ---
 
 # Fyne GUI Application Development
@@ -193,7 +187,7 @@ title := widget.NewLabel(lang.X("win.title", "My Title")) // explicit key + defa
 age := widget.NewLabel(lang.N("{% raw %}{{.Years}}{% endraw %} years old", n, map[string]any{"Years": n}))
 ```
 
-Translation files are JSON, loaded via `//go:embed` and `lang.AddTranslationsFS`. Full usage — see `references/best-practices.md` Section 15.
+Translation files are JSON, loaded via `//go:embed` and `lang.AddTranslationsFS`. Full usage — see `references/best-practices.md` i18n Translations section.
 
 ## Canvas Primitives
 
@@ -280,18 +274,14 @@ Data binding APIs are safe from any goroutine; callbacks are automatically dispa
 ## Dialogs
 
 ```go
-dialog.ShowInformation("Title", "Message", parent)
+dialog.ShowInformation("Title", "Msg", parent)
 dialog.ShowConfirm("Title", "Msg", func(ok bool) {}, parent)
 dialog.ShowError(err, parent)
 dialog.ShowFileOpen(callback, parent)
-dialog.ShowFileSave(callback, parent)
-dialog.ShowFolderOpen(callback, parent)
-dialog.ShowCustom("Title", "OK", content, parent)
-dialog.ShowForm("Title", "Submit", "Cancel", formItems, callback, parent)
-dialog.ShowEntry("Title", "Msg", parent)
-dialog.ShowColorPicker("Title", "Msg", callback, parent)
-dialog.NewProgress("Title", "Msg", parent)       // returns ProgressDialog
+// Also: FileSave, FolderOpen, Custom, Form, Entry, ColorPicker, Progress
 ```
+
+Full API list — see `references/api-reference.md` Dialogs API section.
 
 ## Menus & Shortcuts
 
@@ -299,17 +289,16 @@ dialog.NewProgress("Title", "Msg", parent)       // returns ProgressDialog
 // Window menu bar
 item := fyne.NewMenuItem("Copy", nil)
 item.Shortcut = &fyne.ShortcutCopy{Clipboard: w.Clipboard()}
-fileMenu := fyne.NewMenu("File",
-    fyne.NewMenuItem("New", newFile),
-    fyne.NewMenuItemSeparator(),
-    fyne.NewMenuItem("Quit", func() { a.Quit() }))
-w.SetMainMenu(fyne.NewMainMenu(fileMenu, editMenu))
+w.SetMainMenu(fyne.NewMainMenu(
+    fyne.NewMenu("File", fyne.NewMenuItem("Quit", func() { a.Quit() }))))
 
-// Canvas-level custom shortcuts
+// Custom shortcuts
 w.Canvas().AddShortcut(&desktop.CustomShortcut{
-    KeyName: fyne.KeyS, Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
-}, func(shortcut fyne.Shortcut) { /* Save As */ })
+    KeyName: fyne.KeyS, Modifier: fyne.KeyModifierControl,
+}, func(s fyne.Shortcut) {})
 ```
+
+Full API (ActionItem, Separator, DisabledItem, Shortcut types, etc.) — see `references/api-reference.md` Menus API and Shortcuts sections.
 
 ## System Tray
 
@@ -318,49 +307,20 @@ if desk, ok := a.(desktop.App); ok {
     desk.SetSystemTrayMenu(fyne.NewMenu("Tray",
         fyne.NewMenuItem("Show", func() { w.Show() })))
 }
-w.SetCloseIntercept(func() { w.Hide() }) // close → hide, don't exit
+w.SetCloseIntercept(func() { w.Hide() }) // close hides, no exit
 ```
 
-Full lifecycle management (hide/show, custom icon) — see `references/best-practices.md` Section 19.
+Lifecycle management (custom icon, hide/show, exit handling) — see `references/best-practices.md` System Tray Lifecycle section.
 
 ## Compiling & Deployment
 
-### Build Tags
-
-Common: `mobile` (simulate mobile on desktop), `debug` (visualize layout bounds), `hints` (optimization tips), `no_emoji` (reduce binary size). Full list — see `references/deployment.md`.
-
-### Desktop Packaging
+Common build tags: `mobile` (simulate mobile), `debug` (layout bounds), `hints` (optimization tips), `no_emoji` (reduce size). Full list — see `references/deployment.md`.
 
 ```bash
-fyne package -os darwin -icon myapp.png    # macOS → .app
-fyne package -os linux -icon myapp.png     # Linux → .tar.gz
-fyne package -os windows -icon myapp.png   # Windows → .exe
-```
-
-### Mobile Packaging
-
-```bash
-fyne package -os android -app-id com.example.app -icon icon.png  # .apk
-fyne package -os ios -app-id com.example.app -icon icon.png      # .app
-adb install myapp.apk                                             # install Android
-xcrun simctl install booted myapp.app                             # install iOS simulator
-```
-
-### Web Packaging
-
-```bash
-fyne serve                  # local test at http://localhost:8080
-fyne package -os web        # generate WebAssembly release files
-```
-
-### Cross Compilation
-
-Direct compilation requires target-platform C compilers. Using `fyne-cross` (Docker-based) is recommended:
-
-```bash
-go install github.com/fyne-io/fyne-cross@latest
-fyne-cross linux -output myapp ./
-fyne-cross windows -arch=*
+fyne package -os darwin -icon myapp.png   # desktop packaging
+fyne package -os android -app-id com.e.ap # mobile packaging
+fyne serve                                 # web local test
+fyne-cross linux -output myapp ./          # cross-compilation (recommended)
 ```
 
 Full cross-compilation setup, app store distribution (macOS/iOS/Android) — see `references/deployment.md`.
@@ -369,31 +329,19 @@ Full cross-compilation setup, app store distribution (macOS/iOS/Android) — see
 
 ```go
 // TextStyle
-fyne.TextStyle{Bold: true, Italic: false, Monospace: false,
-    Underline: false, Strikethrough: false, Symbol: false, TabWidth: 4}
-```
+fyne.TextStyle{Bold: true, Italic: false, Monospace: false, TabWidth: 4}
 
-### Custom Theme (full template in references/api-reference.md)
-
-```go
+// Custom theme — implement Theme interface (Color/Font/Icon/Size), fallback to DefaultTheme()
 type myTheme struct{}
 func (t myTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-    switch name {
-    case theme.ColorNamePrimary:
-        return color.NRGBA{R: 70, G: 130, B: 255, A: 255}
-    default:
-        return theme.DefaultTheme().Color(name, v) // fallback to default
-    }
+    if name == theme.ColorNamePrimary { return color.NRGBA{R:70, G:130, B:255, A:255} }
+    return theme.DefaultTheme().Color(name, v)
 }
-func (t myTheme) Font(s fyne.TextStyle) fyne.Resource { return theme.DefaultTheme().Font(s) }
-func (t myTheme) Icon(name fyne.ThemeIconName) fyne.Resource { return theme.DefaultTheme().Icon(name) }
-func (t myTheme) Size(name fyne.ThemeSizeName) float32 { return theme.DefaultTheme().Size(name) }
-
 app.Settings().SetTheme(&myTheme{})
-container.NewThemeOverride(&myTheme{}, content)  // local override
+container.NewThemeOverride(&myTheme{}, content) // local override
 ```
 
-For common colors/sizes/fonts/icons, see `references/api-reference.md` Theme & Styling section.
+Full custom theme template, color/size/font/icon constant lookup — see `references/api-reference.md` Theme & Styling section.
 
 ## Testing
 
@@ -492,15 +440,15 @@ Understanding these conventions lets you infer undocumented APIs from built-in W
 |----------|------|--------------|
 | Unsure which Widget/API to use | `references/api-reference.md` | Complete Widget list, Container list |
 | Need full color/icon/font lists | `references/api-reference.md` | Theme & Styling section |
-| Layout issues / responsive design | `references/best-practices.md` | Section 2 "Layout Patterns" |
-| Data binding not working | `references/best-practices.md` | Section 3 "Data Binding Patterns" |
+| Layout issues / responsive design | `references/best-practices.md` | Layout Patterns |
+| Data binding not working | `references/best-practices.md` | Data Binding Patterns |
 | Widget not showing / crash / perf | `references/troubleshooting.md` | Start with quick diagnosis table, then sections |
 | Writing custom Widgets | `references/custom-widget.md` | Full template + 5 key rules |
-| Extending existing Widgets (adding behavior) | `references/best-practices.md` | Section 17 "Extending Existing Widgets" |
-| Implementing custom layouts | `references/best-practices.md` | Section 16 "Custom Layouts" |
-| Adding app translations (i18n) | `references/best-practices.md` | Section 15 "i18n Translations" |
-| System tray / window lifecycle | `references/best-practices.md` | Sections 19 + 20 |
-| Preferences persistence | `references/best-practices.md` | Section 18 "Advanced Preferences" |
+| Extending existing Widgets (adding behavior) | `references/best-practices.md` | Extending Existing Widgets |
+| Implementing custom layouts | `references/best-practices.md` | Custom Layouts |
+| Adding app translations (i18n) | `references/best-practices.md` | i18n Translations |
+| System tray / window lifecycle | `references/best-practices.md` | System Tray Lifecycle + Multi-Window |
+| Preferences persistence | `references/best-practices.md` | Advanced Preferences |
 | Build tags / cross-compiling / packaging | `references/deployment.md` | Relevant sections |
 | How to write unit tests | `references/testing.md` | Interaction simulation, rendering verification |
 

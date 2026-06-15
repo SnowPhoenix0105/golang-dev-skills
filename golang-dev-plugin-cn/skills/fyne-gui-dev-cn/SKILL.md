@@ -1,10 +1,6 @@
 ---
 name: fyne-gui-dev-cn
-description: |
-  Fyne 跨平台 GUI 应用开发。当用户需要创建、修改、调试、或理解 Fyne GUI 应用时使用此技能。
-  触发场景：提到 fyne、GUI 桌面应用、跨平台界面、自定义 Widget、fyne 布局、数据绑定、
-  widget.New*/container.New*/app.New* 等 Fyne API、Go 语言图形界面开发。
-  即使用户没有明确说"fyne"，只要在做 Go GUI 开发就应该考虑此技能。
+description: Fyne 跨平台 GUI 应用开发。当用户需要创建、修改、调试、或理解 Fyne GUI 应用时使用此技能。触发场景：提到 fyne、GUI 桌面应用、跨平台界面、自定义 Widget、fyne 布局、数据绑定、widget.New*/container.New*/app.New* 等 Fyne API、Go 语言图形界面开发。即使用户没有明确说"fyne"，只要在做 Go GUI 开发就应该考虑此技能。
 ---
 
 # Fyne GUI 应用开发
@@ -191,7 +187,7 @@ title := widget.NewLabel(lang.X("win.title", "My Title")) // 显式 key + 默认
 age := widget.NewLabel(lang.N("{% raw %}{{.Years}}{% endraw %} years old", n, map[string]any{"Years": n}))
 ```
 
-翻译文件为 JSON，使用 `//go:embed` 嵌入后用 `lang.AddTranslationsFS` 加载。完整用法见 `references/best-practices.md` 第 15 节。
+翻译文件为 JSON，使用 `//go:embed` 嵌入后用 `lang.AddTranslationsFS` 加载。完整用法见 `references/best-practices.md` i18n 翻译章节。
 
 ## Canvas 原始图形
 
@@ -278,18 +274,14 @@ fyne.DoAndWait(func() {
 ## 对话框
 
 ```go
-dialog.ShowInformation("Title", "Message", parent)
+dialog.ShowInformation("Title", "Msg", parent)
 dialog.ShowConfirm("Title", "Msg", func(ok bool) {}, parent)
 dialog.ShowError(err, parent)
 dialog.ShowFileOpen(callback, parent)
-dialog.ShowFileSave(callback, parent)
-dialog.ShowFolderOpen(callback, parent)
-dialog.ShowCustom("Title", "OK", content, parent)
-dialog.ShowForm("Title", "Submit", "Cancel", formItems, callback, parent)
-dialog.ShowEntry("Title", "Msg", parent)
-dialog.ShowColorPicker("Title", "Msg", callback, parent)
-dialog.NewProgress("Title", "Msg", parent)       // 返回 ProgressDialog
+// 其他：FileSave、FolderOpen、Custom、Form、Entry、ColorPicker、Progress
 ```
+
+完整 API 列表见 `references/api-reference.md` 对话框 API 部分。
 
 ## 菜单与快捷键
 
@@ -297,17 +289,16 @@ dialog.NewProgress("Title", "Msg", parent)       // 返回 ProgressDialog
 // 窗口菜单栏
 item := fyne.NewMenuItem("Copy", nil)
 item.Shortcut = &fyne.ShortcutCopy{Clipboard: w.Clipboard()}
-fileMenu := fyne.NewMenu("File",
-    fyne.NewMenuItem("New", newFile),
-    fyne.NewMenuItemSeparator(),
-    fyne.NewMenuItem("Quit", func() { a.Quit() }))
-w.SetMainMenu(fyne.NewMainMenu(fileMenu, editMenu))
+w.SetMainMenu(fyne.NewMainMenu(
+    fyne.NewMenu("File", fyne.NewMenuItem("Quit", func() { a.Quit() }))))
 
-// 画布级自定义快捷键
+// 自定义快捷键
 w.Canvas().AddShortcut(&desktop.CustomShortcut{
-    KeyName: fyne.KeyS, Modifier: fyne.KeyModifierControl | fyne.KeyModifierShift,
-}, func(shortcut fyne.Shortcut) { /* Save As */ })
+    KeyName: fyne.KeyS, Modifier: fyne.KeyModifierControl,
+}, func(s fyne.Shortcut) {})
 ```
+
+完整 API（ActionItem、Separator、DisabledItem、Shortcut 类型等）见 `references/api-reference.md` 菜单 API 和快捷键部分。
 
 ## 系统托盘
 
@@ -316,49 +307,20 @@ if desk, ok := a.(desktop.App); ok {
     desk.SetSystemTrayMenu(fyne.NewMenu("Tray",
         fyne.NewMenuItem("Show", func() { w.Show() })))
 }
-w.SetCloseIntercept(func() { w.Hide() }) // 关闭 → 隐藏，不退出
+w.SetCloseIntercept(func() { w.Hide() }) // 关闭隐藏，不退出
 ```
 
-完整生命周期管理（隐藏/显示、自定义图标）见 `references/best-practices.md` 第 19 节。
+生命周期管理（自定义图标、隐藏/显示、退出处理）见 `references/best-practices.md` 系统托盘生命周期章节。
 
 ## 编译与部署
 
-### 编译标签
-
-常用：`mobile`（桌面端模拟移动端）、`debug`（可视化布局边界）、`hints`（优化建议）、`no_emoj`（减小体积）。完整列表见 `references/deployment.md`。
-
-### 桌面打包
+常用编译标签：`mobile`（模拟移动端）、`debug`（布局边界）、`hints`（优化建议）、`no_emoj`（减小体积）。完整列表见 `references/deployment.md`。
 
 ```bash
-fyne package -os darwin -icon myapp.png    # macOS → .app
-fyne package -os linux -icon myapp.png     # Linux → .tar.gz
-fyne package -os windows -icon myapp.png   # Windows → .exe
-```
-
-### 移动端打包
-
-```bash
-fyne package -os android -app-id com.example.app -icon icon.png  # .apk
-fyne package -os ios -app-id com.example.app -icon icon.png      # .app
-adb install myapp.apk                                             # 安装 Android
-xcrun simctl install booted myapp.app                             # 安装 iOS 模拟器
-```
-
-### Web 打包
-
-```bash
-fyne serve                  # 本地测试 http://localhost:8080
-fyne package -os web        # 生成 WebAssembly 发布文件
-```
-
-### 交叉编译
-
-直接编译需目标平台 C 编译器。推荐使用 `fyne-cross`（Docker 封装）：
-
-```bash
-go install github.com/fyne-io/fyne-cross@latest
-fyne-cross linux -output myapp ./
-fyne-cross windows -arch=*
+fyne package -os darwin -icon myapp.png   # 桌面打包
+fyne package -os android -app-id com.e.ap # 移动端打包
+fyne serve                                 # Web 本地测试
+fyne-cross linux -output myapp ./          # 交叉编译（推荐）
 ```
 
 完整交叉编译配置、应用商店分发（macOS/iOS/Android）见 `references/deployment.md`。
@@ -366,32 +328,20 @@ fyne-cross windows -arch=*
 ## 主题与样式
 
 ```go
-// TextStyle — 文本样式
-fyne.TextStyle{Bold: true, Italic: false, Monospace: false,
-    Underline: false, Strikethrough: false, Symbol: false, TabWidth: 4}
-```
+// TextStyle
+fyne.TextStyle{Bold: true, Italic: false, Monospace: false, TabWidth: 4}
 
-### 自定义主题（完整模板见 references/api-reference.md）
-
-```go
+// 自定义主题 — 实现 Theme 接口（Color / Font / Icon / Size），回退到 DefaultTheme()
 type myTheme struct{}
 func (t myTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-    switch name {
-    case theme.ColorNamePrimary:
-        return color.NRGBA{R: 70, G: 130, B: 255, A: 255}
-    default:
-        return theme.DefaultTheme().Color(name, v) // 回退到默认
-    }
+    if name == theme.ColorNamePrimary { return color.NRGBA{R:70, G:130, B:255, A:255} }
+    return theme.DefaultTheme().Color(name, v)
 }
-func (t myTheme) Font(s fyne.TextStyle) fyne.Resource { return theme.DefaultTheme().Font(s) }
-func (t myTheme) Icon(name fyne.ThemeIconName) fyne.Resource { return theme.DefaultTheme().Icon(name) }
-func (t myTheme) Size(name fyne.ThemeSizeName) float32 { return theme.DefaultTheme().Size(name) }
-
 app.Settings().SetTheme(&myTheme{})
-container.NewThemeOverride(&myTheme{}, content)  // 局部覆写
+container.NewThemeOverride(&myTheme{}, content) // 局部覆写
 ```
 
-常用颜色/尺寸/字体/图标查询见 `references/api-reference.md` 样式与主题部分。
+完整自定义主题模板、颜色/尺寸/字体/图标常量查询见 `references/api-reference.md` 样式与主题部分。
 
 ## 测试
 
@@ -490,15 +440,15 @@ rg "CreateRenderer" "$FYNE_DIR/widget/" | head -20
 |------|---------|---------|
 | 不确定用哪个 Widget/API | `references/api-reference.md` | 完整 Widget 列表、Container 列表 |
 | 需要完整颜色/图标/字体列表 | `references/api-reference.md` | 样式与主题部分（末尾 TOC） |
-| 布局不对/需要响应式设计 | `references/best-practices.md` | 第2节"布局模式" |
-| 数据绑定不工作 | `references/best-practices.md` | 第3节"数据绑定模式" |
+| 布局不对/需要响应式设计 | `references/best-practices.md` | 布局模式 |
+| 数据绑定不工作 | `references/best-practices.md` | 数据绑定模式 |
 | Widget 不显示/崩溃/性能差 | `references/troubleshooting.md` | 先查快速诊断表，再查对应章节 |
 | 写自定义 Widget | `references/custom-widget.md` | 完整模板 + 5 条关键规则 |
-| 扩展已有 Widget（添加行为） | `references/best-practices.md` | 第17节"扩展已有 Widget" |
-| 实现自定义布局 | `references/best-practices.md` | 第16节"自定义布局" |
-| 添加应用翻译 (i18n) | `references/best-practices.md` | 第15节"i18n 翻译" |
-| 系统托盘/窗口生命周期 | `references/best-practices.md` | 第19节 + 第20节 |
-| Preferences 持久化设置 | `references/best-practices.md` | 第18节"Preferences 进阶" |
+| 扩展已有 Widget（添加行为） | `references/best-practices.md` | 扩展已有 Widget |
+| 实现自定义布局 | `references/best-practices.md` | 自定义布局 |
+| 添加应用翻译 (i18n) | `references/best-practices.md` | i18n 翻译 |
+| 系统托盘/窗口生命周期 | `references/best-practices.md` | 系统托盘生命周期 + 多窗口进阶 |
+| Preferences 持久化设置 | `references/best-practices.md` | Preferences 进阶 |
 | 编译标签/交叉编译/打包/分发 | `references/deployment.md` | 对应章节 |
 | 单元测试怎么写 | `references/testing.md` | 模拟交互、渲染验证示例 |
 

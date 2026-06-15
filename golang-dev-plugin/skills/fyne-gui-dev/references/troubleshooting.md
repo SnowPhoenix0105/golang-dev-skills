@@ -554,7 +554,7 @@ c := container.NewWithoutLayout(obj1, obj2)
 w.SetContent(c)
 ```
 
-**Note**: Manually positioned containers don't adapt to window resizing and have no explicit minimum size. For production, consider a custom Layout (see `references/best-practices.md` Section 16).
+**Note**: Manually positioned containers don't adapt to window resizing and have no explicit minimum size. For production, consider a custom Layout (see `references/best-practices.md` Custom Layouts section).
 
 ### 11.7 FYNE_SCALE environment variable
 

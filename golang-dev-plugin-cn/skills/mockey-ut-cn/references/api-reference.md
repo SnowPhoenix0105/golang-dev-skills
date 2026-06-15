@@ -16,6 +16,7 @@ import c "github.com/smartystreets/goconvey/convey"  // 仅在需要 goconvey �
 - [条件 Mock](#条件-mock)
 - [序列返回](#序列返回)
 - [装饰器模式](#装饰器模式)
+- [接口 Mock (`exp/iface`)](#接口-mock-expiface)
 - [泛型 Mock](#泛型-mock)
 - [GetMethod](#getmethod)
 - [Goroutine 过滤](#goroutine-过滤)
@@ -184,6 +185,140 @@ decorator := func(in string) string {
 }
 
 mockey.Mock(targetFunc).Origin(&origin).To(decorator).Build()
+```
+
+---
+
+## 接口 Mock (`exp/iface`)
+
+通过 `mockey/exp/iface` 包，mock 一个接口方法即可对所有实现了该接口的类型生效，无需逐一 mock 具体类型。
+
+> **注意**：这是实验性功能，需要 Go 1.20+ 且 < 1.26。
+
+### 导入
+
+```go
+import "github.com/bytedance/mockey/exp/iface"
+```
+
+### 基本用法
+
+mock 接口方法，对所有实现类型生效：
+
+```go
+// mock io.Reader.Read，所有 io.Reader 的实现都被 mock
+m := iface.Mock(io.Reader.Read).Return(1, io.EOF).Build()
+defer m.UnPatch()
+
+// 验证：bytes.Reader、bytes.Buffer、net.TCPConn、os.File 等全部被 mock
+data, _ := io.ReadAll(bytes.NewReader([]byte("hello"))) // [0] <nil>
+```
+
+### 自定义接口
+
+```go
+type MyInterface interface {
+    Foo(s string) string
+    Bar()
+}
+
+// mock 所有 MyInterface 实现
+m := iface.Mock(MyInterface.Foo).Return("mocked!").Build()
+defer m.UnPatch()
+
+// 无论哪种实现，Foo 都返回 "mocked!"
+```
+
+### To（自定义钩子）
+
+钩子签名与原方法一致，可选包含 `unsafe.Pointer` 作为第一个参数（指向 receiver）：
+
+```go
+// 不含 receiver — 对所有实现用同一逻辑
+iface.Mock(MyInterface.Foo).To(func(s string) string {
+    return "MOCKED: " + s
+}).Build()
+
+// 含 receiver — 根据具体实现类型分发
+iface.Mock(MyInterface.Foo).To(func(r unsafe.Pointer, s string) string {
+    switch r {
+    case unsafe.Pointer(impl1):
+        return "from impl1: " + s
+    case unsafe.Pointer(impl2):
+        return "from impl2: " + s
+    default:
+        return "other: " + s
+    }
+}).Build()
+```
+
+### When（条件 Mock）
+
+条件函数签名同样可选包含 receiver：
+
+```go
+iface.Mock(MyInterface.Foo).
+    When(func(s string) bool { return s == "hello" }).
+    Return("hi").Build()
+
+// 含 receiver 的条件
+iface.Mock(MyInterface.Foo).
+    When(func(r unsafe.Pointer, s string) bool {
+        return (*MyImpl)(r).flag && s == "hello"
+    }).
+    Return("matched").Build()
+```
+
+### SelectType / SelectPkg — 限定 mock 范围
+
+如果不希望 mock 所有实现，可以用 selector 精确限定：
+
+```go
+// 仅 mock *MyIImpl1 和 *MyIImpl2（按类型名匹配）
+iface.Mock(MyInterface.Foo,
+    iface.SelectType("MyIImpl1", "MyIImpl2"),
+).Return("only two types").Build()
+
+// 仅 mock 特定包下的实现（按完整包路径）
+iface.Mock(MyInterface.Foo,
+    iface.SelectPkg("example.com/myapp/service"),
+).Return("only this pkg").Build()
+
+// 组合使用：AND 语义（类型名 + 包路径同时匹配）
+iface.Mock(MyInterface.Foo,
+    iface.SelectType("MyIImpl1"),
+    iface.SelectPkg("example.com/myapp/service"),
+).Return("both conditions").Build()
+```
+
+### Mocker 方法
+
+`Build()` 返回的 `*iface.Mocker` 提供：
+
+| 方法 | 作用 |
+| :--- | :--- |
+| `m.UnPatch()` | 解除所有关联的 mock |
+| `m.Times()` | 底层方法的调用总次数 |
+| `m.MockTimes()` | mock 实际生效的次数 |
+
+```go
+m := iface.Mock(io.Reader.Read).Return(1, nil).Build()
+// ... 执行测试 ...
+fmt.Println(m.Times())     // 5 = 共调用了 5 次
+fmt.Println(m.MockTimes()) // 4 = 其中 4 次被 mock 拦截
+m.UnPatch()
+```
+
+### 与 PatchConvey / PatchRun 集成
+
+接口 mock 的 `*iface.Mocker` 可以与 `mockey.PatchConvey` / `mockey.PatchRun` 配合使用，作用域结束后自动释放：
+
+```go
+mockey.PatchConvey("test with iface mock", t, func() {
+    iface.Mock(io.Reader.Read).Return(1, io.EOF).Build()
+    // 此处所有 io.Reader 实现都被 mock
+    // PatchConvey 结束后自动恢复
+})
 ```
 
 ---

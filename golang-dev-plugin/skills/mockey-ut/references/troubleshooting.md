@@ -160,4 +160,4 @@ Three approaches to mock interfaces, in order of preference:
 2. **GetMethod** — resolve method reference from instance, then mock
 3. **Dummy implementation** — create a dummy implementation type and mock the constructor
 
-See the API reference in SKILL.md for details.
+See `references/api-reference.md` Interface Mock section for details.

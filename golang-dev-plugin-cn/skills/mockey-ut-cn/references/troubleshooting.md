@@ -160,4 +160,4 @@ mock 接口的三种方式，按推荐程度：
 2. **GetMethod** — 从实例获取方法引用后 mock
 3. **dummy 实现** — 创建接口的 dummy 实现类型并 mock 构造函数
 
-详见 SKILL.md 中的 API 参考。
+详见 `references/api-reference.md` 接口 Mock 章节。
