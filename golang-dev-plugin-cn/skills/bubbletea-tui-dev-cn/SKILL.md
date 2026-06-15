@@ -1,11 +1,6 @@
 ---
 name: bubbletea-tui-dev-cn
-description: |
-  Bubble Tea 终端 UI (TUI) 应用开发。基于 Elm Architecture 的 Go TUI 框架。
-  触发场景：提到 bubbletea、bubble tea、TUI、终端界面、命令行界面、tea.Model、tea.Cmd、
-  tea.NewProgram、tea.KeyPressMsg、Bubbles 组件（spinner/textinput/textarea/table/list/viewport）、
-  Lip Gloss 样式、Elm Architecture、终端渲染等。
-  即使用户没有明确说"bubbletea"，只要在做 Go 终端界面开发就应该考虑此技能。
+description: Bubble Tea 终端 UI (TUI) 应用开发。基于 Elm Architecture 的 Go TUI 框架。触发场景：提到 bubbletea、bubble tea、TUI、终端界面、命令行界面、tea.Model、tea.Cmd、tea.NewProgram、tea.KeyPressMsg、Bubbles 组件（spinner/textinput/textarea/table/list/viewport）、Lip Gloss 样式、Elm Architecture、终端渲染等。即使用户没有明确说"bubbletea"，只要在做 Go 终端界面开发就应该考虑此技能。
 ---
 
 # Bubble Tea TUI 应用开发
@@ -371,6 +366,7 @@ func (m mainModel) View() tea.View {
 ```go
 // teatest — Bubble Tea 官方测试库
 // 可在 go.mod 中添加：github.com/charmbracelet/x/exp/teatest
+// ⚠️ 实验性 API，位于 x/exp 下，接口可能变化
 
 // 测试 Program 运行
 func TestMyApp(t *testing.T) {

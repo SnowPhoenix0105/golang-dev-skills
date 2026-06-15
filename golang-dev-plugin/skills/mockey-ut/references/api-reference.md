@@ -16,6 +16,7 @@ import c "github.com/smartystreets/goconvey/convey"  // only when goconvey asser
 - [Conditional Mock](#conditional-mock)
 - [Sequence Return](#sequence-return)
 - [Decorator Pattern](#decorator-pattern)
+- [Interface Mock (`exp/iface`)](#interface-mock-expiface)
 - [Generic Mock](#generic-mock)
 - [GetMethod](#getmethod)
 - [Goroutine Filtering](#goroutine-filtering)
@@ -184,6 +185,140 @@ decorator := func(in string) string {
 }
 
 mockey.Mock(targetFunc).Origin(&origin).To(decorator).Build()
+```
+
+---
+
+## Interface Mock (`exp/iface`)
+
+Use `mockey/exp/iface` to mock an interface method once and have it apply to all types that implement that interface — no need to mock each implementation individually.
+
+> **Note**: This is an experimental feature. Requires Go 1.20+ and < 1.26.
+
+### Import
+
+```go
+import "github.com/bytedance/mockey/exp/iface"
+```
+
+### Basic Usage
+
+Mock an interface method — all implementing types are affected:
+
+```go
+// mock io.Reader.Read — all io.Reader implementations get mocked
+m := iface.Mock(io.Reader.Read).Return(1, io.EOF).Build()
+defer m.UnPatch()
+
+// Verification: bytes.Reader, bytes.Buffer, net.TCPConn, os.File are all mocked
+data, _ := io.ReadAll(bytes.NewReader([]byte("hello"))) // [0] <nil>
+```
+
+### Custom Interfaces
+
+```go
+type MyInterface interface {
+    Foo(s string) string
+    Bar()
+}
+
+// mock all MyInterface implementations
+m := iface.Mock(MyInterface.Foo).Return("mocked!").Build()
+defer m.UnPatch()
+
+// Regardless of implementation, Foo always returns "mocked!"
+```
+
+### To (Custom Hook)
+
+The hook signature matches the original method, optionally including `unsafe.Pointer` as the first argument (pointing to the receiver):
+
+```go
+// Without receiver — same logic for all implementations
+iface.Mock(MyInterface.Foo).To(func(s string) string {
+    return "MOCKED: " + s
+}).Build()
+
+// With receiver — dispatch based on concrete implementation type
+iface.Mock(MyInterface.Foo).To(func(r unsafe.Pointer, s string) string {
+    switch r {
+    case unsafe.Pointer(impl1):
+        return "from impl1: " + s
+    case unsafe.Pointer(impl2):
+        return "from impl2: " + s
+    default:
+        return "other: " + s
+    }
+}).Build()
+```
+
+### When (Conditional Mock)
+
+Condition function can also optionally include a receiver:
+
+```go
+iface.Mock(MyInterface.Foo).
+    When(func(s string) bool { return s == "hello" }).
+    Return("hi").Build()
+
+// With receiver condition
+iface.Mock(MyInterface.Foo).
+    When(func(r unsafe.Pointer, s string) bool {
+        return (*MyImpl)(r).flag && s == "hello"
+    }).
+    Return("matched").Build()
+```
+
+### SelectType / SelectPkg — Scoping the Mock
+
+If you don't want to mock all implementations, use selectors to narrow down:
+
+```go
+// Only mock *MyIImpl1 and *MyIImpl2 (matched by type name)
+iface.Mock(MyInterface.Foo,
+    iface.SelectType("MyIImpl1", "MyIImpl2"),
+).Return("only two types").Build()
+
+// Only mock implementations within a specific package (by full import path)
+iface.Mock(MyInterface.Foo,
+    iface.SelectPkg("example.com/myapp/service"),
+).Return("only this pkg").Build()
+
+// Combined: AND semantics (type name + package path both match)
+iface.Mock(MyInterface.Foo,
+    iface.SelectType("MyIImpl1"),
+    iface.SelectPkg("example.com/myapp/service"),
+).Return("both conditions").Build()
+```
+
+### Mocker Methods
+
+`Build()` returns `*iface.Mocker`, which provides:
+
+| Method | Purpose |
+| :--- | :--- |
+| `m.UnPatch()` | Remove all associated mocks |
+| `m.Times()` | Total number of calls to the underlying methods |
+| `m.MockTimes()` | Number of times the mock actually took effect |
+
+```go
+m := iface.Mock(io.Reader.Read).Return(1, nil).Build()
+// ... run tests ...
+fmt.Println(m.Times())     // 5 = called 5 times total
+fmt.Println(m.MockTimes()) // 4 = mocked on 4 of those calls
+m.UnPatch()
+```
+
+### Integration with PatchConvey / PatchRun
+
+The `*iface.Mocker` works seamlessly with `mockey.PatchConvey` / `mockey.PatchRun` — mocks are auto-released when the scope ends:
+
+```go
+mockey.PatchConvey("test with iface mock", t, func() {
+    iface.Mock(io.Reader.Read).Return(1, io.EOF).Build()
+    // All io.Reader implementations are mocked here
+    // Auto-restored after PatchConvey ends
+})
 ```
 
 ---

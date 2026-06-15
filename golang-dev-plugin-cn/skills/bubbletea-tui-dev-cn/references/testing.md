@@ -85,6 +85,8 @@ func TestDataLoadedHandler(t *testing.T) {
 
 `teatest` 是 Bubble Tea 生态的集成测试库（`github.com/charmbracelet/x/exp/teatest`），支持完整的 Program 生命周期测试。
 
+> ⚠️ **实验性 API**：`teatest` 位于 `x/exp` 下，API 可能在版本间变化，生产环境中需注意兼容性。
+
 ### 基础用法
 
 ```go

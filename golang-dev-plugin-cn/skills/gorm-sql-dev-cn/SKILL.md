@@ -1,11 +1,6 @@
 ---
 name: gorm-sql-dev-cn
-description: |
-  GORM SQL 数据库 ORM 开发。当用户需要创建、修改、调试 Go 语言的数据库操作代码，使用 GORM 进行 CRUD、
-  关联查询、事务、迁移、代码生成时使用此技能。
-  触发场景：提到 gorm、数据库、MySQL、PostgreSQL、SQLite、CRUD、ORM、DAO、gen、gorm gen、
-  gorm cli、关联查询、Preload、事务、AutoMigrate、gorm.Model、钩子/Hooks 等。
-  即使用户没有明确说"gorm"，只要在做 Go 数据库开发就应该考虑此技能。
+description: GORM SQL 数据库 ORM 开发。当用户需要创建、修改、调试 Go 语言的数据库操作代码，使用 GORM 进行 CRUD、关联查询、事务、迁移、代码生成时使用此技能。触发场景：提到 gorm、数据库、MySQL、PostgreSQL、SQLite、CRUD、ORM、DAO、gen、gorm gen、gorm cli、关联查询、Preload、事务、AutoMigrate、gorm.Model、钩子/Hooks 等。即使用户没有明确说"gorm"，只要在做 Go 数据库开发就应该考虑此技能。
 ---
 
 # GORM SQL 数据库开发
@@ -289,6 +284,7 @@ gorm gen                        # 从数据库生成代码
 | `references/hooks-plugins-logger.md` | 生命周期钩子、插件系统、Logger 配置、错误处理 |
 | `references/generics.md` | `gorm.G[T]` 泛型 API 完整使用指南 |
 | `references/code-generation.md` | gen（代码生成）和 cli（CLI 工具）的使用指南 |
+| `references/best-practices.md` | N+1 预防、零值策略、连接池、软删除、事务、迁移、性能优化等模式 |
 | `references/troubleshooting.md` | 常见问题与排障指南 |
 
 ## 排障速查

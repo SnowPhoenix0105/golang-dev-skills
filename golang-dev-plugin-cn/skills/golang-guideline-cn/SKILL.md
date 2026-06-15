@@ -274,50 +274,27 @@ dot import 会将外部包的导出符号全部注入当前包的命名空间，
 
 ## 3. 故障排查
 
-### 3.1 Go 版本不匹配
+常见 Go 开发问题及解决方案（Go 版本不匹配、Module 冲突、CGO/交叉编译、Race Detector、GC 调优、编译错误速查、IDE/gopls、依赖校验等）见 `references/troubleshooting.md`。
 
-当项目要求的 Go 版本与当前激活的版本不一致时，按以下顺序处理：
+### 快速参考
 
-**步骤一：检查本地是否已有预装版本**
+| 问题 | 关键命令/方向 |
+| :--- | :--- |
+| Go 版本不匹配 | `ls ~/sdk/` 或 `go install golang.org/dl/go1.XX@latest` |
+| go mod tidy 失败 | `go list -m -versions <module>` 检查版本 |
+| CGO 编译失败 | `CGO_ENABLED=0 go build .` |
+| 竞态条件 | `go test -race ./...` |
+| 内存/性能问题 | `go tool pprof` + `-benchmem` |
+| gopls 不工作 | `pkill gopls` 或清除 `~/.cache/gopls` |
+| go.sum 冲突 | `rm go.sum && go mod tidy` |
 
-```bash
-ls ~/sdk/
-```
+完整排查步骤见 `references/troubleshooting.md`。
 
-如果所需版本（如 `go1.22.8`）已存在于 `~/sdk/` 下，直接使用版本化二进制即可：
+## 参考资料
 
-```bash
-go1.22.8 version
-go1.22.8 build ./...
-```
-
-**步骤二：通过 `golang.org/dl` 安装**
-
-如果 `~/sdk/` 中没有所需版本，使用 Go 官方版本管理器：
-
-```bash
-# 安装目标版本的 dl 封装
-go install golang.org/dl/go1.22.8@latest
-
-# 下载并安装该版本
-go1.22.8 download
-
-# 验证
-go1.22.8 version
-```
-
-这会自动将版本安装到 `~/sdk/go1.22.8/`。之后直接用 `go1.22.8` 来执行命令即可，无需手动修改 `PATH` 或 `GOROOT`。
-
-**步骤三：同步 `go.mod`（按需）**
-
-如果需要将 `go.mod` 更新为刚安装的版本：
-
-```bash
-go1.22.8 mod edit -go=1.22.8
-go1.22.8 mod tidy
-```
-
-在检查和修改 `go.mod` 时应使用版本化的二进制（`go1.22.8`）而非系统默认 `go`，以确保使用正确的工具链。
+| 场景 | 查阅文件 |
+| :--- | :--- |
+| 编译错误、版本不匹配、Module 冲突、CGO、Race Detector、GC 调优、IDE 问题 | `references/troubleshooting.md` |
 
 ---
 

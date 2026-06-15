@@ -1,12 +1,6 @@
 ---
 name: gorm-sql-dev
-description: |
-  GORM SQL database ORM development. Use this skill when creating, modifying, or debugging Go database
-  operations with GORM for CRUD, associations, transactions, migrations, and code generation.
-  Trigger scenarios: mentions of gorm, database, MySQL, PostgreSQL, SQLite, CRUD, ORM, DAO,
-  gen, gorm gen, gorm cli, association queries, Preload, transactions, AutoMigrate,
-  gorm.Model, Hooks.
-  Even without explicit mention of "gorm", consider this skill for any Go database development.
+description: GORM SQL database ORM development. Use this skill when creating, modifying, or debugging Go database operations with GORM for CRUD, associations, transactions, migrations, and code generation. Trigger scenarios: mentions of gorm, database, MySQL, PostgreSQL, SQLite, CRUD, ORM, DAO, gen, gorm gen, gorm cli, association queries, Preload, transactions, AutoMigrate, gorm.Model, Hooks. Even without explicit mention of "gorm", consider this skill for any Go database development.
 ---
 
 # GORM SQL Database Development
@@ -290,6 +284,7 @@ Full usage guides: `references/code-generation.md`.
 | `references/hooks-plugins-logger.md` | Lifecycle hooks, plugin system, Logger configuration, error handling |
 | `references/generics.md` | `gorm.G[T]` generic API complete usage guide |
 | `references/code-generation.md` | gen (code generation) and cli (CLI tool) usage guide |
+| `references/best-practices.md` | N+1 prevention, zero-value strategies, connection pooling, soft delete, transactions, migrations, performance patterns |
 | `references/troubleshooting.md` | Common issues and troubleshooting guide |
 
 ## Quick Troubleshooting

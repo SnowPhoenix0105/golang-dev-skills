@@ -274,50 +274,27 @@ Exception: the user or another skill explicitly requires dot imports.
 
 ## 3. Troubleshooting
 
-### 3.1 Go Version Mismatch
+Common Go development issues and solutions (Go version mismatch, module conflicts, CGO/cross-compilation, race detector, GC tuning, compilation errors, IDE/gopls, dependency checksum, etc.) — see `references/troubleshooting.md`.
 
-When the version of Go required by the project does not match the currently active version, handle it in the following order:
+### Quick Reference
 
-**Step 1: Check if the required version is already installed locally**
+| Issue | Key Command / Direction |
+| :--- | :--- |
+| Go version mismatch | `ls ~/sdk/` or `go install golang.org/dl/go1.XX@latest` |
+| go mod tidy fails | `go list -m -versions <module>` to check versions |
+| CGO build failure | `CGO_ENABLED=0 go build .` |
+| Race conditions | `go test -race ./...` |
+| Memory/performance | `go tool pprof` + `-benchmem` |
+| gopls not working | `pkill gopls` or clear `~/.cache/gopls` |
+| go.sum conflict | `rm go.sum && go mod tidy` |
 
-```bash
-ls ~/sdk/
-```
+Full troubleshooting steps — see `references/troubleshooting.md`.
 
-If the required version (e.g., `go1.22.8`) already exists under `~/sdk/`, use the versioned binary directly:
+## References
 
-```bash
-go1.22.8 version
-go1.22.8 build ./...
-```
-
-**Step 2: Install via `golang.org/dl`**
-
-If the required version is not in `~/sdk/`, use Go's official version manager:
-
-```bash
-# Install the dl wrapper for the target version
-go install golang.org/dl/go1.22.8@latest
-
-# Download and install that version
-go1.22.8 download
-
-# Verify
-go1.22.8 version
-```
-
-This automatically installs the version to `~/sdk/go1.22.8/`. After that, use `go1.22.8` directly to run commands — no need to manually modify `PATH` or `GOROOT`.
-
-**Step 3: Sync `go.mod` (as needed)**
-
-If you need to update `go.mod` to the newly installed version:
-
-```bash
-go1.22.8 mod edit -go=1.22.8
-go1.22.8 mod tidy
-```
-
-When inspecting or modifying `go.mod`, use the versioned binary (`go1.22.8`) rather than the system default `go` to ensure the correct toolchain is used.
+| Scenario | Read |
+| :--- | :--- |
+| Build errors, version mismatch, module conflicts, CGO, race detector, GC tuning, IDE issues | `references/troubleshooting.md` |
 
 ---
 

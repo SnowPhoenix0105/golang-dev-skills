@@ -554,7 +554,7 @@ c := container.NewWithoutLayout(obj1, obj2)
 w.SetContent(c)
 ```
 
-**注意**：手动定位的容器不会随窗口大小自适应，也不提供最小尺寸。正式应用中推荐使用自定义 Layout（见 `references/best-practices.md` 第 16 节）。
+**注意**：手动定位的容器不会随窗口大小自适应，也不提供最小尺寸。正式应用中推荐使用自定义 Layout（见 `references/best-practices.md` 自定义布局章节）。
 
 ### 11.7 FYNE_SCALE 环境变量
 

@@ -85,6 +85,8 @@ func TestDataLoadedHandler(t *testing.T) {
 
 `teatest` is the official Bubble Tea integration test library (`github.com/charmbracelet/x/exp/teatest`), supporting full Program lifecycle testing.
 
+> ⚠️ **Experimental API**: `teatest` lives under `x/exp` — APIs may change between versions. Be mindful of compatibility in production environments.
+
 ### Basic Usage
 
 ```go
