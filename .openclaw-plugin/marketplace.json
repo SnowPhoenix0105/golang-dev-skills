@@ -1,7 +1,7 @@
 {
   "id": "golang-dev-skills",
   "name": "Go Development Skills",
-  "description": "A collection of Go development skills for OpenClaw, covering Fyne GUI development, Go coding guidelines, unit test mocking, GORM database development, and Bubble Tea TUI development.",
+  "description": "A collection of Go development skills for OpenClaw, covering Fyne GUI development, Wails desktop apps, Go coding guidelines, unit test mocking, GORM database development, and Bubble Tea TUI development.",
   "version": "1.0.0",
   "kind": "skills",
   "skills": [
@@ -14,7 +14,9 @@
     "./golang-dev-plugin-cn/skills/gorm-sql-dev-cn",
     "./golang-dev-plugin/skills/gorm-sql-dev",
     "./golang-dev-plugin-cn/skills/bubbletea-tui-dev-cn",
-    "./golang-dev-plugin/skills/bubbletea-tui-dev"
+    "./golang-dev-plugin/skills/bubbletea-tui-dev",
+    "./golang-dev-plugin-cn/skills/wails-gui-dev-cn",
+    "./golang-dev-plugin/skills/wails-gui-dev"
   ],
   "configSchema": {
     "type": "object",
